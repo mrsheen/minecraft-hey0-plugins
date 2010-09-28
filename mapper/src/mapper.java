@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 
 
-public class mapper implements Plugin {
+public class mapper extends Plugin {
     protected static final Logger log = Logger.getLogger("Minecraft");
     private WorldMap wm;
     private final String newLine = System.getProperty("line.separator");
@@ -17,13 +17,19 @@ public class mapper implements Plugin {
     public void enable() {
         if (wm.load())
             log.info("[Mapper] Mod Enabled.");
+			etc().getInstance().addCommand("/newlabel", "[label] - Adds new label at the current position");
+			etc().getInstance().addCommand("/dellabel", "[label] - Deletes label");
+			
         else
             log.info("[Mapper] Error while loading.");
     }
     
     
     public void disable() {
+		etc().getInstance().removeCommand("/newlabel");
+		etc().getInstance().removeCommand("/dellabel");
         log.info("[Mapper] Mod Disabled.");
+		
     }
 
     public String onLoginChecks(String user) {
@@ -44,6 +50,7 @@ public class mapper implements Plugin {
             return false;
         
 		if (split[0].equalsIgnoreCase("/newlabel")) {
+		//!TODO!add error checking to look for existing labels
             if (split.length < 2) {
                 player.sendMessage(Colors.Rose + "Correct usage is: /newlabel [name] ");
                 return true;
@@ -65,6 +72,7 @@ public class mapper implements Plugin {
             }
         }
 		else if (split[0].equalsIgnoreCase("/dellabel")) {
+		//!TODO!add error checking to delete only existing labels
             if (split.length < 2) {
                 player.sendMessage(Colors.Rose + "Correct usage is: /dellabel [name] ");
                 return true;
@@ -83,6 +91,8 @@ public class mapper implements Plugin {
                 player.sendMessage(Colors.Rose + "[Mapper] Error Serverside");
             }
         }
+		//!TODO!add listlabels
+		
         else
             return false;
         return true;
@@ -120,7 +130,10 @@ public class mapper implements Plugin {
             BufferedWriter fout = new BufferedWriter(new FileWriter(tempFile));
             String line = null;
             while ( (line = fin.readLine()) != null) {
-                if (!line.startsWith(label)) {
+				if (line.equals("")) {
+					continue;
+				}
+                else if (!line.startsWith(label)) {
                     fout.write(line + newLine);
                     fout.flush();
                 }
@@ -142,5 +155,12 @@ public class mapper implements Plugin {
     
     public boolean onBlockDestroy(Player player, Block block) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+	
+	public boolean onPlayerMoved(Player player) {
+		// log.log(Level.INFO, "Got player moved: " + player.getName() + " - " + Double.toString(player.getX()));
+        if (delLabel(wm.playerPosFile, player.getName())) {};
+        if (saveLabel(wm.playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { };
+		return false;
     }
 }

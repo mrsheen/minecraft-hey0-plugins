@@ -38,5 +38,6 @@ Icons IDs: (yet to be fully implemented)
 
 Plugin Installation:
   *Copy mapper.jar from /plugin and mapper.properties to plugins/ folder.
+  *Add "mapper" (without quotes) to the plugins line of server.properties  
   *Insert /newlabel and/or /dellabel into groups.txt for any usergroups you wish to have acces to making labels.
 
