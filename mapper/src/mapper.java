@@ -6,28 +6,86 @@ import java.util.logging.Logger;
 
 
 public class mapper extends Plugin {
+
+
+	// From WorldMap
+	public String filename;
+    public final int SCALE = 1;
+    public final int MARKER_PADDING = 5; //Pixels
+    public final int BOX_PADDING = 1; //Pixels
+    public final int IMAGE_PADDING = 10; //Pixels 
+    public final int CHUNK_SIZE = 16; //Pixels
+    public String worldDir;
+    public String homesFile;
+    public String labelsFile;
+    public String playerPosFile;
+    public Properties properties;
+
     protected static final Logger log = Logger.getLogger("Minecraft");
-    private WorldMap wm;
     private final String newLine = System.getProperty("line.separator");
     
     public mapper() {
-        wm = WorldMap.getInstance();
+		properties = new Properties();
+	}
+	
+	public boolean load() {
+        try {
+            File f = new File("mapper.properties");
+            if (f.exists())
+			{
+                properties.load(new FileInputStream("mapper.properties"));
+				}
+            else
+			{
+                f.createNewFile();
+				}
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Exception while creating mapper properties file.", e);
+        }
+        
+        
+        worldDir = properties.getProperty("worlddir");
+        homesFile = properties.getProperty("homes", "homes.txt");
+        labelsFile = properties.getProperty("labels", "mapper-labels.txt");
+        playerPosFile = properties.getProperty("playerpos", "mapper-playerpos.txt");
+        
+        String[] filesToCheck = { homesFile, labelsFile, playerPosFile };
+        for (String f : filesToCheck) {
+            try {
+                File fileCreator = new File(f);
+                if (!fileCreator.exists())
+                    fileCreator.createNewFile();
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Exception while creating mapper file.", e);
+            }
+        }
+        
+        try {
+            properties.store(new FileOutputStream("mapper.properties"), null);
+        } catch (Exception e) {
+                log.log(Level.SEVERE, "Exception while saving mapper properties file.", e);
+        }
+        
+        return true;
     }
     
     public void enable() {
-        if (wm.load())
+        if (load())
+		{
             log.info("[Mapper] Mod Enabled.");
-			etc().getInstance().addCommand("/newlabel", "[label] - Adds new label at the current position");
-			etc().getInstance().addCommand("/dellabel", "[label] - Deletes label");
-			
+			etc.getInstance().addCommand("/newlabel", "[label] - Adds new label at the current position");
+			etc.getInstance().addCommand("/dellabel", "[label] - Deletes label");
+		}	
         else
+		{
             log.info("[Mapper] Error while loading.");
+			}
     }
     
     
     public void disable() {
-		etc().getInstance().removeCommand("/newlabel");
-		etc().getInstance().removeCommand("/dellabel");
+		etc.getInstance().removeCommand("/newlabel");
+		etc.getInstance().removeCommand("/dellabel");
         log.info("[Mapper] Mod Disabled.");
 		
     }
@@ -37,8 +95,8 @@ public class mapper extends Plugin {
     }
 
     public void onLogin(Player player) {
-        if (delLabel(wm.playerPosFile, player.getName())) {}
-        if (saveLabel(wm.playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { }
+        if (delLabel(playerPosFile, player.getName())) {}
+        if (saveLabel(playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { }
     }
 
     public boolean onChat(Player player, String message) {
@@ -63,7 +121,7 @@ public class mapper extends Plugin {
                     label += split[i];
             }
             
-            if (saveLabel(wm.labelsFile, label, player.getX(), player.getY(), player.getZ(), labelId)) {
+            if (saveLabel(labelsFile, label, player.getX(), player.getY(), player.getZ(), labelId)) {
                 log.info("[Mapper] "+player.getName()+" created a new label called "+split[1]+".");
                 player.sendMessage(Colors.Green + "Label Created!");
             } else {
@@ -83,7 +141,7 @@ public class mapper extends Plugin {
                     label += split[i];
             }
             
-            if (delLabel(wm.labelsFile, label)) {
+            if (delLabel(labelsFile, label)) {
                 log.info("[Mapper] "+player.getName()+" deleted a label called "+split[1]+".");
                 player.sendMessage(Colors.Green + "Label Deleted!");
             } else {
@@ -156,11 +214,12 @@ public class mapper extends Plugin {
     public boolean onBlockDestroy(Player player, Block block) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void onPlayerMoved(Player player) {
 	
-	public boolean onPlayerMoved(Player player) {
-		// log.log(Level.INFO, "Got player moved: " + player.getName() + " - " + Double.toString(player.getX()));
-        if (delLabel(wm.playerPosFile, player.getName())) {};
-        if (saveLabel(wm.playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { };
-		return false;
-    }
+		if (delLabel(playerPosFile, player.getName())) {}
+        if (saveLabel(playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { }
+		
+	}
+	
 }
