@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 
+
+import net.minecraft.server.MinecraftServer;
+
 public class CuboidPlugin extends Plugin {
 	// Version 4.2 : 29/09 14h00 GMT+2
 	// for servermod100
@@ -188,7 +191,7 @@ public class CuboidPlugin extends Plugin {
 			else if (split[0].equalsIgnoreCase("/ccopy")){
 				if (Cuboid.isReady(true)){
 					Cuboid.enregisterCuboid();
-					player.sendMessage(Colors.LightGreen + "Le cuboid a été enregistré.");
+					player.sendMessage(Colors.LightGreen + "The cuboid was recorded.");
 				}
 				else{
 					player.sendMessage(Colors.Rose + "No cuboid has been selected");
@@ -199,7 +202,7 @@ public class CuboidPlugin extends Plugin {
 			else if (split[0].equalsIgnoreCase("/cpaste")){
 				if (Cuboid.isReady(false)){
 					Cuboid.poserCuboid();
-					player.sendMessage(Colors.LightGreen + "Le cuboid a été reconstitué.");
+					player.sendMessage(Colors.LightGreen + "The cuboid has been reconstituted.");
 				}									
 				else{
 					player.sendMessage(Colors.Rose + "No cuboid has been selected");
@@ -214,7 +217,7 @@ public class CuboidPlugin extends Plugin {
 						taille = Integer.parseInt( split[1] );
 					}
 					else{
-						player.sendMessage(Colors.Rose + "Soucis avec la taille en paramètre.");
+						player.sendMessage(Colors.Rose + "Concerns with the size parameter.");
 					}
 				}
 				return true;

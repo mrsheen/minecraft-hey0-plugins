@@ -9,6 +9,8 @@ public class GriefAlert extends Plugin{
 	
 	private String name = "GriefAlert";
 	
+	
+	
 	static MinecraftServer world = etc.getMCServer();
 	static final Logger log = Logger.getLogger("Minecraft");
 	
@@ -17,6 +19,22 @@ public class GriefAlert extends Plugin{
 	static ArrayList<Block> correspondingBloc = new ArrayList<Block>();
 	
 	static boolean toggleAlertes = true;
+	
+	
+    public void enable() {
+		log.info("[GriefAlert] Mod Enabled.");
+			etc.getInstance().addCommand("/griefalert", "Request a jump to a player");
+			etc.getInstance().addCommand("/gareload", "Reload GriefAlert data");
+			
+    }
+
+    public void disable() {
+		etc.getInstance().removeCommand("/griefalert");
+		etc.getInstance().removeCommand("/gareload");
+		
+		log.info("[GriefAlert] Mod Disabled");
+    }
+    
 	
 	public boolean onCommand(Player player, String[] split) {
 		String playername = player.getName();
@@ -115,11 +133,6 @@ public class GriefAlert extends Plugin{
 		return false;
 	}
 
-	public void enable()
-	{
-	}
-	
-	public void disable()
-	{
-	}
+
+
 }

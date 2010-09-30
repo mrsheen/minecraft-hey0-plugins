@@ -2,6 +2,12 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Date.*;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+
+
 
 
 
@@ -20,12 +26,18 @@ public class mapper extends Plugin {
     public String labelsFile;
     public String playerPosFile;
     public Properties properties;
+	public SimpleDateFormat dateFormat ;
+	public Date date;
+	public Date oldDate;
+	public Calendar cal;
+	public String[] lineArray;
 
     protected static final Logger log = Logger.getLogger("Minecraft");
     private final String newLine = System.getProperty("line.separator");
     
     public mapper() {
 		properties = new Properties();
+		dateFormat = new SimpleDateFormat("dd-HH.mm.ss");
 	}
 	
 	public boolean load() {
@@ -65,8 +77,12 @@ public class mapper extends Plugin {
         } catch (Exception e) {
                 log.log(Level.SEVERE, "Exception while saving mapper properties file.", e);
         }
+		
+		
         
         return true;
+		
+		
     }
     
     public void enable() {
@@ -95,6 +111,8 @@ public class mapper extends Plugin {
     }
 
     public void onLogin(Player player) {
+		
+		
         if (delLabel(playerPosFile, player.getName())) {}
         if (saveLabel(playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { }
     }
@@ -167,11 +185,17 @@ public class mapper extends Plugin {
     public void onKick(Player player, String reason) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+	
+	public boolean saveLabel(String file, String label, double x, double y, double z, int id) {
+		date = new java.util.Date();
+		//System.out.println("Current Date Time : " + dateFormat.format(date));
+        return saveLabel(file, label, x, y, z, id, dateFormat.format(date));
+    }
     
-    public boolean saveLabel(String file, String label, double x, double y, double z, int id) {
+    public boolean saveLabel(String file, String label, double x, double y, double z, int id, String date) {
         try {
             BufferedWriter fout = new BufferedWriter(new FileWriter(file, true));
-            fout.write(newLine + label + ":" + Double.toString(x) + ":" + Double.toString(y) + ":" + Double.toString(z) + ":" + Integer.toString(id));
+            fout.write(newLine + label + ":" + Double.toString(x) + ":" + Double.toString(y) + ":" + Double.toString(z) + ":" + Integer.toString(id) + ":" + date);
             fout.close();
         } catch (Exception e) {
             log.log(Level.SEVERE, "Exception while creating new label", e);
@@ -187,13 +211,36 @@ public class mapper extends Plugin {
             BufferedReader fin = new BufferedReader(new FileReader(inFile));
             BufferedWriter fout = new BufferedWriter(new FileWriter(tempFile));
             String line = null;
+
+			// Work out 5 minutes ago
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.MINUTE, -5);
+			date = cal.getTime();
+			
+			Date oldDate = new java.util.Date();
+
+
             while ( (line = fin.readLine()) != null) {
 				if (line.equals("")) {
 					continue;
 				}
                 else if (!line.startsWith(label)) {
-                    fout.write(line + newLine);
-                    fout.flush();
+					lineArray = line.split(":");
+					if (lineArray.length == 6)
+					{						
+						try {
+							oldDate = dateFormat.parse (lineArray[5]);
+						}
+						catch(Exception e) {
+							//ee.printStackTrace();
+						}
+					}
+				
+					if (oldDate.after(date))
+					{
+						fout.write(line + newLine);
+						fout.flush();
+					}
                 }
             }
             fin.close();

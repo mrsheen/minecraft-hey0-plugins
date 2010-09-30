@@ -84,7 +84,7 @@ public class ProtectedArea {
 		int[] firstPoint = Cuboid.getPoint(playerName, false);
 		int[] secondPoint = Cuboid.getPoint(playerName, true);
 
-		ProtectedCuboids.add(firstPoint[0]);	// Méthode plus élégante
+		ProtectedCuboids.add(firstPoint[0]);	// Method plus elegant
 		ProtectedCuboids.add(firstPoint[1]);
 		ProtectedCuboids.add(firstPoint[2]);
 		ProtectedCuboids.add(secondPoint[0]);
