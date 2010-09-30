@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 import net.minecraft.server.MinecraftServer;
 
@@ -10,15 +13,39 @@ public class CuboidPlugin extends Plugin {
 	@SuppressWarnings("unused")
 	private String name = "CuboidPlugin";
 	
+	
+	static final Logger log = Logger.getLogger("Minecraft");
+	
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Boolean> lastStatus = new ArrayList<Boolean>();
 	static ArrayList<Block> correspondingBloc = new ArrayList<Block>();
 	
 	public void enable(){
 		ProtectedArea.loadProtectedAreas();
+		log.info("[CuboidPlugin] Mod Enabled.");
+		etc.getInstance().addCommand("/protect", "<player> g:<groupName> <name of the cuboid>");
+		etc.getInstance().addCommand("/listprotected", "- List the protected cuboids by name"); 
+		etc.getInstance().addCommand("/removeprotected", "<protected cuboid name> - Remove the protected cuboid");
+		etc.getInstance().addCommand("/toggleprot", "- Turns on/off the cuboid protection (worldwide)");
+		etc.getInstance().addCommand("/creload", "- Reloads the data file, in case you edited it manually");
+		etc.getInstance().addCommand("/cfill","<bloc ID|name> - Fills the selected cuboid with the specified blocType" );
+		etc.getInstance().addCommand("/creplace","<bloc ID|name> <bloc ID|name> - Replaces blocTypes within the selected cuboid");
+		etc.getInstance().addCommand("/cdel", "- Removes any bloc within the selected cuboid");
+		etc.getInstance().addCommand("/csize", "- Displays the number of blocs inside the selected cuboid");
+		
 	}
 	
 	public void disable(){
+		etc.getInstance().removeCommand("/protect");
+		etc.getInstance().removeCommand("/listprotected"); 
+		etc.getInstance().removeCommand("/removeprotected");
+		etc.getInstance().removeCommand("/toggleprot");
+		etc.getInstance().removeCommand("/creload");
+		etc.getInstance().removeCommand("/cfill");
+		etc.getInstance().removeCommand("/creplace");
+		etc.getInstance().removeCommand("/cdel");
+		etc.getInstance().removeCommand("/csize");
+		log.info("[CuboidPlugin] Mod disabled.");
 	}
 	
 	public boolean onCommand(Player player, String[] split) {

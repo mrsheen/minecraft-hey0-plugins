@@ -52,7 +52,7 @@ public class mapper extends Plugin {
                 f.createNewFile();
 				}
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Exception while creating mapper properties file.", e);
+            log.log(Level.SEVERE, "[mapper] : Exception while creating mapper properties file.", e);
         }
         
         
@@ -68,14 +68,14 @@ public class mapper extends Plugin {
                 if (!fileCreator.exists())
                     fileCreator.createNewFile();
             } catch (IOException e) {
-                log.log(Level.SEVERE, "Exception while creating mapper file.", e);
+                log.log(Level.SEVERE, "[mapper] : Exception while creating mapper file.", e);
             }
         }
         
         try {
             properties.store(new FileOutputStream("mapper.properties"), null);
         } catch (Exception e) {
-                log.log(Level.SEVERE, "Exception while saving mapper properties file.", e);
+                log.log(Level.SEVERE, "[mapper] : Exception while saving mapper properties file.", e);
         }
 		
 		
@@ -198,7 +198,7 @@ public class mapper extends Plugin {
             fout.write(newLine + label + ":" + Double.toString(x) + ":" + Double.toString(y) + ":" + Double.toString(z) + ":" + Integer.toString(id) + ":" + date);
             fout.close();
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Exception while creating new label", e);
+            log.log(Level.SEVERE, "[mapper] : Exception while creating new label", e);
             return false;
         }
         return true;
@@ -248,7 +248,7 @@ public class mapper extends Plugin {
             inFile.delete();
             tempFile.renameTo(inFile);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Exception while deleting label", e);
+            log.log(Level.SEVERE, "[mapper] : Exception while deleting label", e);
             return false;
         }
         return true;

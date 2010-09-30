@@ -29,13 +29,13 @@ public class ProtectedArea {
                 writer.append("#The data about protected Cuboids will go there\r\n");
                 writer.close();
             } catch (Exception e) {
-                log.log(Level.SEVERE, "Exception while creating watchedBlocks.txt");
+                log.log(Level.SEVERE, "[CuboidPlugin] : Exception while creating watchedBlocks.txt");
             } finally {
             	try{
             		writer.close();
             	}
             	catch(IOException e){
-            		 log.log(Level.SEVERE, "Exception while closing loadProtectedAreas writer", e);
+            		 log.log(Level.SEVERE, "[CuboidPlugin] : Exception while closing loadProtectedAreas writer", e);
             	}
             }
 		}
@@ -62,9 +62,9 @@ public class ProtectedArea {
 						ProtectedCuboidsNames.add(donnees[7]);
 					}
 					scanner.close();
-					log.info("Cuboid plugin : successfuly loaded.");
+					log.info("[CuboidPlugin] : Successfuly loaded.");
 			} catch (Exception e) {
-				log.log(Level.SEVERE, "Cuboid plugin : Error while reading protectedCuboids.txt", e);
+				log.log(Level.SEVERE, "[CuboidPlugin] : Error while reading protectedCuboids.txt", e);
 			}
 			
 		}
@@ -100,7 +100,7 @@ public class ProtectedArea {
 			writer.newLine();
 			writer.close();
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "Cuboid plugin : Error while writing protectedCuboids.txt", e);
+			log.log(Level.SEVERE, "[CuboidPlugin] : Error while writing protectedCuboids.txt", e);
 			return 2;
 		}
 		log.info(playerName+" created a new protected cuboid named "+cuboidName);
@@ -167,16 +167,16 @@ public class ProtectedArea {
 	            writer.close();
     
 	        } catch (Exception ex) {
-	            log.log(Level.SEVERE, "A problem occured during cuboid removal", ex);
+	            log.log(Level.SEVERE, "[CuboidPlugin] : A problem occured during cuboid removal", ex);
 	            return 2;
 	        }
 		}
 		else{
-			log.log(Level.SEVERE,"protectedCuboids.txt seems to have been removed");
+			log.log(Level.SEVERE,"[CuboidPlugin] : protectedCuboids.txt seems to have been removed");
 			return 3;
 		}
 		
-		log.info(playerName+" removed a protected cuboid named "+cuboidName);
+		log.info("[CuboidPlugin] : "+playerName+" removed a protected cuboid named "+cuboidName);
 		return 0;
 	}
 	

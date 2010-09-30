@@ -34,14 +34,14 @@ public class GriefAlertData {
 	                writer.write("#onUse:327:lava bucket\r\n");
 	                writer.write("#onBreak:57:diamond block:3\r\n");
 	            } catch (Exception e) {
-	                log.log(Level.SEVERE, "Exception while creating watchedBlocks.txt");
+	                log.log(Level.SEVERE, "[GriefAlert] : Exception while creating watchedBlocks.txt");
 	            } finally {
 	                try {
 	                    if (writer != null) {
 	                        writer.close();
 	                    }
 	                } catch (IOException e) {
-	                    log.log(Level.SEVERE, "Exception while closing writer for watchedBlocks.txt");
+	                    log.log(Level.SEVERE, "[GriefAlert] : Exception while closing writer for watchedBlocks.txt");
 	                }
 	            }
 	        }
@@ -66,9 +66,9 @@ public class GriefAlertData {
 		                }
 		            }
 		            scanner.close();
-		            log.info("Antigrief : sucessfuly loaded");
+		            log.info("[GriefAlert] : Sucessfuly loaded data");
 		        } catch (Exception e) {
-		        	log.log(Level.SEVERE, "Antigrief plugin : exception while loading", e);
+		        	log.log(Level.SEVERE, "[GriefAlert] : Exception while loading", e);
 		        }
 	}
 	

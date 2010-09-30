@@ -13,7 +13,6 @@ public class GriefAlert extends Plugin{
 	
 	static MinecraftServer world = etc.getMCServer();
 	static final Logger log = Logger.getLogger("Minecraft");
-	
 	static GriefAlertData griefAlertData = new GriefAlertData();
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Block> correspondingBloc = new ArrayList<Block>();
