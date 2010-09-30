@@ -37,7 +37,7 @@ public class mapper extends Plugin {
     
     public mapper() {
 		properties = new Properties();
-		dateFormat = new SimpleDateFormat("dd-HH.mm.ss");
+		dateFormat = new SimpleDateFormat("YYMMdd-HH.mm.ss");
 	}
 	
 	public boolean load() {
@@ -228,6 +228,7 @@ public class mapper extends Plugin {
 					lineArray = line.split(":");
 					if (lineArray.length == 6)
 					{						
+						//Cheftoad:1894.3887077620723:66.0:-1637.4236299882737:4:01-00.16.2
 						try {
 							oldDate = dateFormat.parse (lineArray[5]);
 						}
@@ -245,7 +246,12 @@ public class mapper extends Plugin {
 					{
 						continue;
 					}
-                }
+				}
+				else
+				{
+					continue;
+				}
+                
             }
             fin.close();
             fout.close();
