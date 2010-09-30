@@ -37,7 +37,7 @@ public class mapper extends Plugin {
     
     public mapper() {
 		properties = new Properties();
-		dateFormat = new SimpleDateFormat("YYMMdd-HH.mm.ss");
+		dateFormat = new SimpleDateFormat("yyMMdd-HH.mm.ss");
 	}
 	
 	public boolean load() {
