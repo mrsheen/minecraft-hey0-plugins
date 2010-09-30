@@ -234,12 +234,16 @@ public class mapper extends Plugin {
 						catch(Exception e) {
 							//ee.printStackTrace();
 						}
+						if (oldDate.after(date))
+						{
+							fout.write(line + newLine);
+							fout.flush();
+						}
+						
 					}
-				
-					if (oldDate.after(date))
+					else
 					{
-						fout.write(line + newLine);
-						fout.flush();
+						continue;
 					}
                 }
             }
