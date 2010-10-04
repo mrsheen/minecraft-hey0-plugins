@@ -19,6 +19,8 @@ public class ProtectedArea {
 	static ArrayList<Integer> ProtectedCuboids = new ArrayList<Integer>();
 	static ArrayList<String> ProtectedCuboidsNames = new ArrayList<String>();
 	static ArrayList<String> ProtectedCuboidsOwners = new ArrayList<String>();
+	static ArrayList<String> ClaimNames = new ArrayList<String>();
+	
 	
 	public static void loadProtectedAreas(){
 		File dataSource = new File("protectedCuboids.txt");
@@ -69,6 +71,54 @@ public class ProtectedArea {
 			
 		}
 	}
+	
+	public static void loadClaimedAreas(){
+		File dataSource = new File("protectedCuboids_claims.txt");
+		if (!dataSource.exists()){
+			FileWriter writer = null;
+            try {
+                writer = new FileWriter("protectedCuboids_claims.txt", true);
+                writer.append("#The data about protected Cuboid claims will go there\r\n");
+                writer.close();
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "[CuboidPlugin] : Exception while creating protectedCuboids_claims.txt");
+            } finally {
+            	try{
+            		writer.close();
+            	}
+            	catch(IOException e){
+            		 log.log(Level.SEVERE, "[CuboidPlugin] : Exception while closing loadClaimedAreas writer", e);
+            	}
+            }
+		}
+		else{
+			try {
+					ClaimNames = new ArrayList<String>();
+					Scanner scanner = new Scanner(dataSource);
+					while (scanner.hasNextLine()) {
+						String line = scanner.nextLine();
+						if (line.startsWith("#") || line.equals("")) {
+							continue;
+						}
+						String[] donnees = line.split(",");
+						if (donnees.length < 10) {
+							continue;
+						}
+						
+						Cuboid.setPoint(donnees[8], Integer.parseInt(donnees[0]), Integer.parseInt(donnees[1]), Integer.parseInt(donnees[2]), Integer.parseInt(donnees[6]));
+						Cuboid.setPoint(donnees[8], Integer.parseInt(donnees[3]), Integer.parseInt(donnees[4]), Integer.parseInt(donnees[5]), Integer.parseInt(donnees[7]));
+						Cuboid.setClaimName(donnees[8], donnees[9]);
+						ClaimNames.add(donnees[9]);
+						
+					}
+					scanner.close();
+					log.info("[CuboidPlugin] : Successfuly loaded claims.");
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "[CuboidPlugin] : Error while reading protectedCuboids_claims.txt", e);
+			}
+			
+		}
+	}
 		
 	public static short protegerCuboid(String playerName, String ownersList, String cuboidName){
 		
@@ -106,6 +156,94 @@ public class ProtectedArea {
 		log.info(playerName+" created a new protected cuboid named "+cuboidName);
 		return 0;
 	}
+	
+	public static short stakeClaim(String playerName, String cuboidName){
+		
+		//	Check chevauchements
+		
+		for(String test : ClaimNames){
+			if(test.contains(cuboidName)){
+				log.info(playerName+" failed to stake a claim named "+cuboidName+" (aleady used)");
+				return 2;
+			}
+		}
+		ClaimNames.add(cuboidName);
+		
+		Cuboid.setClaimName(playerName, cuboidName);
+		int[] firstPoint = Cuboid.getPoint( playerName, true);
+		int[] secondPoint = Cuboid.getPoint( playerName,false);
+		
+		int[] blocks = Cuboid.getBlocks(playerName);
+		
+		boolean removedClaim = false;
+		
+		// Remove claim from file, and from memory
+		removedClaim = removeClaim(playerName);
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter("protectedCuboids_claims.txt", true));
+			String newClaim = firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]+","+secondPoint[2]+","+blocks[0]+","+blocks[1]+","+playerName+","+cuboidName;
+			writer.append(newClaim);
+			writer.newLine();
+			writer.close();
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "[CuboidPlugin] : Error while writing protectedCuboids_claims.txt", e);
+			return -1;
+		}
+		log.info(playerName+" created a new claim named "+cuboidName);
+		if (removedClaim) {
+			return 1;
+		}
+		
+		return 0;
+		
+	}
+	
+	
+	public static boolean removeClaim(String playerName){
+	
+		boolean removedClaim = false;
+		
+		File dataSource = new File("protectedCuboids_claims.txt");
+		if (dataSource.exists()){
+			try {
+	            BufferedReader reader = new BufferedReader(new FileReader(dataSource));
+	            StringBuilder newFile = new StringBuilder();
+	            String line = "";
+	            while ((line = reader.readLine()) != null) {
+	            	String[] split = line.split(",");
+	            	if( split.length == 10 )
+					{
+						if (!split[8].contains(playerName)){
+							newFile.append(line).append("\r\n");   
+						}
+						else
+						{
+							removedClaim = true;
+						}
+	            	}
+	            }
+	            reader.close();
+
+	            FileWriter writer = new FileWriter("protectedCuboids_claims.txt");
+	            writer.write(newFile.toString());
+	            writer.close();
+    
+	        } catch (Exception ex) {
+	            log.log(Level.SEVERE, "[CuboidPlugin] : A problem occured during claim removal", ex);
+	            return false;
+	        }
+		}
+		else{
+			log.log(Level.SEVERE,"[CuboidPlugin] : protectedCuboids_claims.txt seems to have been removed");
+			return false;
+		}
+		
+		
+		
+		return removedClaim;
+	}
+		
 	
 	public static short removeProtectedZone(String playerName, String cuboidName){
 		
@@ -186,6 +324,25 @@ public class ProtectedArea {
 		if (size > 0){
 			for( int i = 0; i<size; i++){
 				cuboidsList += " "+ProtectedCuboidsNames.get(i);
+			}
+		}
+		else{
+			cuboidsList = " <list is empty>";
+		}
+		return cuboidsList;
+	}
+	
+	public static String listerCuboids(String playerName){
+		// !TODO!only return player cuboids
+		String cuboidsList = "";
+		String tempCuboid = "";
+		int size = ProtectedCuboidsNames.size();
+		if (size > 0){
+			for( int i = 0; i<size; i++){
+				tempCuboid = ProtectedCuboidsNames.get(i);
+				if (tempCuboid.startsWith(playerName)){
+					cuboidsList += " "+tempCuboid;
+				}
 			}
 		}
 		else{

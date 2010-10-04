@@ -61,15 +61,37 @@ public class GriefAlert extends Plugin{
 		if ( toggleAlertes  && itemInHand != 280 && !GriefAlertData.useWatchIDs.isEmpty() ){
 			short blocIndexInList = GriefAlertData.isUseWatched(blockPlaced.getType());
 			if ( blocIndexInList>-1 && !etc.getInstance().canUseCommand(player.getName(), "/griefalert") ){
+				//Boolean selfGrief = false;
 				String blocName = GriefAlertData.useWatchNames.get(blocIndexInList);
 				String playerName = player.getName();
-				String messageAlerte = Colors.Rose+playerName+" used "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName;
-				log.info("Antigrief alarm : "+playerName+" used "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName);
-				for  (Player p : etc.getServer().getPlayerList() ) {
-					if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
-						p.sendMessage(messageAlerte);
+				String messageAlerte = playerName+" used "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+blockClicked.getX()+","+blockClicked.getY()+","+blockClicked.getZ()+")";
+				// Check for cuboid plugin
+				// for (Plugin plugin : plugins) {
+                    // if (plugin.getName() == "CuboidPlugin" && plugin.isEnabled()) {
+						// if ( ProtectedArea.toggle && !etc.getInstance().canIgnoreRestrictions(player.getName()) ){
+							//Handled by cuboid plugin
+							// selfGrief = isAllowed(player, blockClicked);;
+						// }
+					// }
+				// }
+			
+				// if (selfGrief) {
+					// log.info("Antigrief alarm (self-grief) : " + messageAlerte);
+					// for  (Player p : etc.getServer().getPlayerList() ) {
+						// if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
+							// p.sendMessage(Colors.Rose+"Self-Grief : "+messageAlerte);
+						// }
+					// }
+				// }
+				// else {
+				
+					log.info("Antigrief alarm : " + messageAlerte);
+					for  (Player p : etc.getServer().getPlayerList() ) {
+						if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
+							p.sendMessage(Colors.Rose+messageAlerte);
+						}
 					}
-				}
+				// }
 			}
 		}
 		else if(itemInHand == 280 && etc.getInstance().canUseCommand(player.getName(), "/degriefstick")){

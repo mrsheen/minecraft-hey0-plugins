@@ -9,6 +9,8 @@ public class Cuboid {
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Boolean> selectionStatus = new ArrayList<Boolean>();
 	static ArrayList<Integer> pointsCoordinates = new ArrayList<Integer>();
+	static ArrayList<Integer> blocksType = new ArrayList<Integer>();
+	static ArrayList<String> claimNames = new ArrayList<String>();
 	
 	//static ArrayList<Integer> Cuboid;
 	
@@ -29,9 +31,23 @@ public class Cuboid {
 			pointsCoordinates.add(0);
 			pointsCoordinates.add(0);
 			pointsCoordinates.add(0);
+			blocksType.add(0);
+			blocksType.add(0);
+			claimNames.add("");
 		}
 				
 		return playerList.indexOf(playerName);
+	}
+	
+	public static String getClaimName(String playerName){
+		
+		int index = getPlayerIndex(playerName);
+		return claimNames.get(index);
+	}
+	
+	public static void setClaimName(String playerName, String claimName){
+		int index = getPlayerIndex(playerName);
+		claimNames.set(index,claimName);
 	}
 	
 	public static boolean setPoint(String playerName, int X, int Y, int Z){
@@ -52,6 +68,27 @@ public class Cuboid {
 		return secondPoint;
 	}
 	
+	
+	public static boolean setPoint(String playerName, int X, int Y, int Z, int blockId){
+		
+		int index = getPlayerIndex(playerName);
+		boolean secondPoint = selectionStatus.get(index);
+		if ( !secondPoint ){
+			pointsCoordinates.set(index*6, X);
+			pointsCoordinates.set(index*6+1, Y);
+			pointsCoordinates.set(index*6+2, Z);
+			blocksType.set(index*2, blockId);
+		}
+		else{
+			pointsCoordinates.set(index*6+3, X);
+			pointsCoordinates.set(index*6+4, Y);
+			pointsCoordinates.set(index*6+5, Z);
+			blocksType.set(index*2+1, blockId);
+		}
+		selectionStatus.set(index, !secondPoint);
+		return secondPoint;
+	}
+	
 	public static int[] getPoint(String playerName, boolean secondPoint){
 		int index = getPlayerIndex(playerName);
 		int[] coords;
@@ -62,6 +99,15 @@ public class Cuboid {
 			coords = new int[]{ pointsCoordinates.get(index*6+3) ,pointsCoordinates.get(index*6+4) ,pointsCoordinates.get(index*6+5) };
 		}
 		return coords;
+	}
+	
+	public static int[] getBlocks(String playerName){
+		int index = getPlayerIndex(playerName);
+		int[] blocks;
+		
+		blocks = new int[]{ blocksType.get(index*2) ,blocksType.get(index*2+1)};
+		
+		return blocks;
 	}
 	
 	public static boolean isReady(String playerName, boolean deuxPoints){
@@ -151,6 +197,39 @@ public class Cuboid {
 				}
 			}
 		}
+	}
+	
+	
+	public static void showClaim(String playerName){
+		int index = getPlayerIndex(playerName);
+		
+		int[] firstPoint = getPoint( playerName, true);
+		int[] secondPoint = getPoint( playerName,false);
+				
+		//int targetBlockIndex = replaceParams.length-1;
+		//int newBlockAId = world.e.a(startX,startY,startZ);
+		//int newBlockGId = world.e.a(endX,endY,endZ);
+		
+		// Who cares what it currently is, lets just replace with sponge YAY SPONGE!
+		world.e.d(firstPoint[0],firstPoint[1],firstPoint[2],19);
+		world.e.d(secondPoint[0],secondPoint[1],secondPoint[2],19);
+
+	}
+	
+	
+	public static void hideClaim(String playerName){
+		int index = getPlayerIndex(playerName);
+				
+		int[] firstPoint = getPoint( playerName, false);
+		int[] secondPoint = getPoint( playerName,true);
+		
+		int[] blocks = getBlocks(playerName);
+		
+		// Who cares what it currently is, lets just replace with sponge YAY SPONGE!
+		world.e.d(firstPoint[0],firstPoint[1],firstPoint[2],blocks[0]);
+		world.e.d(secondPoint[0],secondPoint[1],secondPoint[2],blocks[1]);
+
+
 	}
 	
 	/*

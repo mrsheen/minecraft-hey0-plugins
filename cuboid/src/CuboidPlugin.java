@@ -22,6 +22,7 @@ public class CuboidPlugin extends Plugin {
 	
 	public void enable(){
 		ProtectedArea.loadProtectedAreas();
+		ProtectedArea.loadClaimedAreas();
 		log.info("[CuboidPlugin] Mod Enabled.");
 		etc.getInstance().addCommand("/protect", "<player> g:<groupName> <name of the cuboid>");
 		etc.getInstance().addCommand("/listprotected", "- List the protected cuboids by name"); 
@@ -32,6 +33,10 @@ public class CuboidPlugin extends Plugin {
 		etc.getInstance().addCommand("/creplace","<bloc ID|name> <bloc ID|name> - Replaces blocTypes within the selected cuboid");
 		etc.getInstance().addCommand("/cdel", "- Removes any bloc within the selected cuboid");
 		etc.getInstance().addCommand("/csize", "- Displays the number of blocs inside the selected cuboid");
+		
+		etc.getInstance().addCommand("/stakeclaim", "<name of area> - Stake a claim");
+		etc.getInstance().addCommand("/grantclaim", "<playername> <name of area> - Grant a claim");
+		
 		
 	}
 	
@@ -45,6 +50,8 @@ public class CuboidPlugin extends Plugin {
 		etc.getInstance().removeCommand("/creplace");
 		etc.getInstance().removeCommand("/cdel");
 		etc.getInstance().removeCommand("/csize");
+		etc.getInstance().removeCommand("/stakeclaim");
+		etc.getInstance().removeCommand("/grantclaim");
 		log.info("[CuboidPlugin] Mod disabled.");
 	}
 	
@@ -76,12 +83,112 @@ public class CuboidPlugin extends Plugin {
 						}
 					}
 					else{
-						player.sendMessage(Colors.Yellow + "You need to specify at least one player or group, and a name.");
 					}
+						player.sendMessage(Colors.Yellow + "You need to specify at least one player or group, and a name.");
 				}
 				else{
 					player.sendMessage(Colors.Rose + "No cuboid has been selected");
 				}
+				return true;
+			}
+			else if ( split[0].equalsIgnoreCase("/grantclaim" ) ){
+				//!TODO! update this
+				int paramSize = split.length;
+				if (paramSize == 2){
+					String claimerName = split[1].trim().toLowerCase();
+					String cuboidName = Cuboid.getClaimName(claimerName);
+					//String claimerName = cuboidName.split("_")[0];
+					if (Cuboid.isReady(claimerName, true)){
+						short returnCode = ProtectedArea.protegerCuboid(claimerName, " "+claimerName, cuboidName);
+						if (returnCode==0){
+							player.sendMessage(Colors.LightGreen + "New protected zone created.");
+							player.sendMessage(Colors.LightGreen + "Name : "+Colors.White+cuboidName);
+							player.sendMessage(Colors.LightGreen + "Owners :"+Colors.White+claimerName);
+							Cuboid.hideClaim(claimerName);
+							Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+							Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+							ProtectedArea.removeClaim(claimerName);
+							for  (Player p : etc.getServer().getPlayerList() ) {
+								if (p.getName().toLowerCase() == claimerName){
+									p.sendMessage("Claim granted :)");
+									p.sendMessage("Type /listprotected to check your new land");
+								}
+							}
+							
+						}
+						else if (returnCode==1){
+							player.sendMessage(Colors.Rose + "This name is already linked to a protected zone.");
+						}
+						else if (returnCode==0){
+							player.sendMessage(Colors.Rose + "Error while adding the protected Area.");
+							player.sendMessage("Check server logs for more info");
+						}
+					}
+					else{
+						player.sendMessage(Colors.Rose + claimerName + " has no waiting claims");
+					}
+				}
+				else{
+					player.sendMessage(Colors.Yellow + "Usage : /grantclaim <claimant>");
+				}
+				
+				return true;
+			}
+			else if ( split[0].equalsIgnoreCase("/checkclaim" ) ){
+				//!TODO! update this
+				int paramSize = split.length;
+				if (paramSize == 2){
+					String claimerName = split[1].trim().toLowerCase();
+					//String cuboidName = split[1].trim().toLowerCase();
+					//String claimerName = cuboidName.split("_")[0];
+					if (Cuboid.isReady(claimerName, true)){
+						// Replace A-G of cuboid with sponge
+						Cuboid.showClaim(claimerName);
+						player.sendMessage(Colors.LightGreen + "Cuboid A-G blocks replaced with sponge");
+						player.sendMessage(Colors.LightGreen + "Either /grantclaim " + claimerName + " or /rejectclaim " + claimerName);
+						player.sendMessage(Colors.LightGreen + " (sponge will stay until either command is recieved)");
+					}
+					else{
+						player.sendMessage(Colors.Rose + claimerName + " has no waiting claims");
+					}
+				}
+				else{
+					player.sendMessage(Colors.Yellow + "Usage : /checkclaim <claimant>");
+				}
+				
+				return true;
+			}
+			else if ( split[0].equalsIgnoreCase("/rejectclaim" ) ){
+				//!TODO! update this
+				int paramSize = split.length;
+				if (paramSize >= 2){
+					String claimerName = split[1].trim().toLowerCase();
+					
+					Cuboid.hideClaim(claimerName);
+					Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+					Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+					ProtectedArea.removeClaim(claimerName);
+					for  (Player p : etc.getServer().getPlayerList() ) {
+						if (p.getName().toLowerCase() == claimerName){
+							String optMessage = "";
+							if (paramSize > 2){
+								for (short i=2; i<paramSize; i++){
+									optMessage += " "+split[i];
+								}
+								p.sendMessage("Claim rejected, reason: " + optMessage + " :(");
+							}
+							else
+							{
+								p.sendMessage("Claim rejected :(");
+							}
+						}
+					}
+				
+				}
+				else{
+					player.sendMessage(Colors.Yellow + "Usage : /rejectclaim <claimant> [reason]");
+				}
+				
 				return true;
 			}
 			
@@ -121,7 +228,54 @@ public class CuboidPlugin extends Plugin {
 			
 			else if (split[0].equalsIgnoreCase("/creload")){
 				ProtectedArea.loadProtectedAreas();
+				ProtectedArea.loadClaimedAreas();
 				player.sendMessage(Colors.Green + "Cuboids coordinates reloaded");
+				return true;
+			}
+		}
+		else if (etc.getInstance().canUseCommand(playerName, "/stakeclaim")){
+			//!TODO!Replace this 
+			if ( split[0].equalsIgnoreCase("/stakeclaim" ) ){
+				if (Cuboid.isReady(playerName.toLowerCase(), true)){
+					//String parameters = "";
+					int paramSize = split.length;
+					if (paramSize == 2){
+						String cuboidName = playerName.trim().toLowerCase() + "_" + split[1].trim().toLowerCase();
+						
+						short returnCode = ProtectedArea.stakeClaim(playerName.trim().toLowerCase(), cuboidName);
+						if (returnCode==0 || returnCode==1){
+							player.sendMessage(Colors.LightGreen + "New claim staked" + ((returnCode==1) ? " (old claim purged)" : ""));
+							player.sendMessage(Colors.LightGreen + "Name : "+Colors.White+cuboidName);
+							player.sendMessage(Colors.LightGreen + "Protection will not work until you are contacted by and admin");
+							// Message admins
+							for  (Player p : etc.getServer().getPlayerList() ) {
+								if (etc.getInstance().canUseCommand(p.getName(), "/protect")){
+									p.sendMessage("Player "+playerName+" has staked a claim!");
+									p.sendMessage("TP to them, and do /checkclaim "+playerName.toLowerCase()+" to see the claim");
+								}
+							}
+						}
+						else if (returnCode==2){
+							player.sendMessage(Colors.Rose + "You already have a protected area by this name");
+						}
+						else if (returnCode==-1){
+							player.sendMessage(Colors.Rose + "Error while adding the claim");
+							player.sendMessage("Contact an admin for assistance");
+						}
+					}
+					else{
+						player.sendMessage(Colors.Yellow + "Command format is /stakeclaim <claim_name>");
+					}
+				}
+				else{
+					player.sendMessage(Colors.Rose + "No cuboid has been selected");
+				}
+				return true;
+			}
+			
+			else if (split[0].equalsIgnoreCase("/listprotected")){
+				String cuboidList = ProtectedArea.listerCuboids(playerName.trim().toLowerCase()); //!TODO!only return player cuboids
+				player.sendMessage(Colors.Yellow + "You own"+Colors.White+" :"+cuboidList);
 				return true;
 			}
 		}
@@ -254,8 +408,20 @@ public class CuboidPlugin extends Plugin {
 	}
 
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand){	
-		if ( itemInHand==269 && (etc.getInstance().canUseCommand(player.getName(), "/protect") || etc.getInstance().canUseCommand(player.getName(), "/cuboid")) ){
+		if ( blockPlaced.getType() == 19){ // NO MORE SPONGE!
+			return true;
+		}
+		else if ( itemInHand==269 && (etc.getInstance().canUseCommand(player.getName(), "/protect") || etc.getInstance().canUseCommand(player.getName(), "/cuboid")) ){
 				boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
+				player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
+				return true;
+		}
+		else if ( itemInHand==269 && etc.getInstance().canUseCommand(player.getName(), "/stakeclaim") ){
+				int[] blocks = Cuboid.getBlocks(player.getName().toLowerCase());
+				if ( blocks[0] == 19 && blocks[1] == 19 ) {
+					player.sendMessage(Colors.Rose + "Your previous claim is being processed, please wait" );	
+				}
+				boolean whichPoint = Cuboid.setPoint(player.getName().toLowerCase(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ(), blockClicked.getType());
 				player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
 				return true;
 		}
@@ -279,8 +445,13 @@ public class CuboidPlugin extends Plugin {
 	}
 
 	public boolean onBlockDestroy(Player player, Block block) {
+		//log.info ("[CuboidPlugin] "+player.getName()+" attempted block destroy");
+		//log.info ("[CuboidPlugin] protectedareas: "+ProtectedArea.toggle+" canIgnoreRestrictions: "+etc.getInstance().canIgnoreRestrictions(player.getName()));
 		int targetBlockType = block.getType();
-		if ( targetBlockType == 64 || targetBlockType == 69 || targetBlockType == 77 ){
+		if ( targetBlockType == 19){ // NO MORE SPONGE!
+			return true;
+		}
+		else if ( targetBlockType == 64 || targetBlockType == 69 || targetBlockType == 77 ){
 			// Wood doors, buttons and levers
 			return false;
 		}
@@ -291,6 +462,9 @@ public class CuboidPlugin extends Plugin {
 				if (p==playerName)
 					inList = true;
 			}
+			
+			
+			 
 			
 			if (inList){
 				Block lastTouchedBlock = correspondingBloc.get(playerList.indexOf(playerName));
