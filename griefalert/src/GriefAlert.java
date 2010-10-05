@@ -1,5 +1,8 @@
 import java.util.ArrayList;
+
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.*;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -10,6 +13,7 @@ public class GriefAlert extends Plugin{
 	private String name = "GriefAlert";
 	
 	
+	public PropertiesFile propertiesFile;
 	
 	static MinecraftServer world = etc.getMCServer();
 	static final Logger log = Logger.getLogger("Minecraft");
@@ -19,10 +23,16 @@ public class GriefAlert extends Plugin{
 	
 	static boolean toggleAlertes = true;
 	
-	
+	private static int window = 0;
+	private int maxLocations = 200;
 	
 	static ArrayList<String> locationList = new ArrayList<String>();
 	static ArrayList<Location> griefLocations = new ArrayList<Location>();
+	
+	public GriefAlert() {
+		propertiesFile = new PropertiesFile("griefalert.properties");
+		
+	}
 	
 	private static int getLocationIndex(String locationName){
 		
@@ -45,20 +55,49 @@ public class GriefAlert extends Plugin{
 		return griefLocations.get(index);
 	}
 	
-	public static String setLocation(Location griefLocation){
-		String locationName = Integer.toString(locationList.size() % 200);
+	public String setLocation(Location griefLocation){
+		if (window == maxLocations) {
+			window = 0;
+		}
+		String locationName = Integer.toString(window++);
 		int index = getLocationIndex(locationName);
 		griefLocations.set(index,griefLocation);
 		return locationName;
 	}
 	
+	public boolean load() {
+		try {
+            File f = new File("griefalert.properties");
+            if (f.exists())
+			{
+                propertiesFile.load();
+			}
+            else
+			{
+                f.createNewFile();
+			}
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "[GriefAlert] : Exception while creating GriefAlert properties file.", e);
+			return false;
+        }
+        
+		
+		
+        maxLocations = propertiesFile.getInt("maxlocations", 200);
+		return true;
+	}
 	
     public void enable() {
-		log.info("[GriefAlert] Mod Enabled.");
+		if (load()) {
+			log.info("[GriefAlert] Mod Enabled.");
 			etc.getInstance().addCommand("/griefalert", "Request a jump to a player");
 			etc.getInstance().addCommand("/gareload", "Reload GriefAlert data");
 			etc.getInstance().addCommand("/gtp", "[index] - Teleport to location of grief alert");
-			
+		}
+        else
+		{
+            log.info("[GriefAlert] Error while loading.");
+		}
     }
 
     public void disable() {
