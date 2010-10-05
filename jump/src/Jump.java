@@ -25,7 +25,7 @@ public class Jump extends Plugin {
 
 
     public boolean onCommand(Player player, String[] split) {
-        if (!etc.getInstance().canUseCommand(player.getName(), split[0])) {
+        if (!player.canUseCommand(split[0])) {
             return false;
         }
 

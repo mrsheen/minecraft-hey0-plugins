@@ -50,6 +50,16 @@ public class Cuboid {
 		claimNames.set(index,claimName);
 	}
 	
+	public static String getClaims(){
+		String waitingClaims = "";
+		for (String claim : claimNames){
+			if (claim != "") {
+				waitingClaims += claim + " ";
+			}
+		}
+		return waitingClaims;
+	}
+	
 	public static boolean setPoint(String playerName, int X, int Y, int Z){
 		
 		int index = getPlayerIndex(playerName);

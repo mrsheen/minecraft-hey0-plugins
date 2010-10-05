@@ -58,7 +58,7 @@ public class CuboidPlugin extends Plugin {
 	public boolean onCommand(Player player, String[] split) {
 		String playerName = player.getName();
 
-		if (etc.getInstance().canUseCommand(playerName, "/protect")){
+		if (player.canUseCommand("/protect")){
 			if ( split[0].equalsIgnoreCase("/protect" ) ){
 				if (Cuboid.isReady(playerName, true)){
 					String parameters = "";
@@ -107,9 +107,10 @@ public class CuboidPlugin extends Plugin {
 							Cuboid.hideClaim(claimerName);
 							Cuboid.setPoint(claimerName, 0, 0, 0, 0);
 							Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+							Cuboid.setClaimName(claimerName, "");
 							ProtectedArea.removeClaim(claimerName);
 							for  (Player p : etc.getServer().getPlayerList() ) {
-								if (p.getName().toLowerCase() == claimerName){
+								if (p.getName().equalsIgnoreCase(claimerName)){
 									p.sendMessage("Claim granted :)");
 									p.sendMessage("Type /listprotected to check your new land");
 								}
@@ -154,6 +155,7 @@ public class CuboidPlugin extends Plugin {
 				}
 				else{
 					player.sendMessage(Colors.Yellow + "Usage : /checkclaim <claimant>");
+					player.sendMessage(Colors.Yellow + "Waiting claims: " + Cuboid.getClaims());
 				}
 				
 				return true;
@@ -167,9 +169,11 @@ public class CuboidPlugin extends Plugin {
 					Cuboid.hideClaim(claimerName);
 					Cuboid.setPoint(claimerName, 0, 0, 0, 0);
 					Cuboid.setPoint(claimerName, 0, 0, 0, 0);
+					Cuboid.setClaimName(claimerName, "");
 					ProtectedArea.removeClaim(claimerName);
+					
 					for  (Player p : etc.getServer().getPlayerList() ) {
-						if (p.getName().toLowerCase() == claimerName){
+						if (p.getName().trim().equalsIgnoreCase(claimerName)){
 							String optMessage = "";
 							if (paramSize > 2){
 								for (short i=2; i<paramSize; i++){
@@ -187,6 +191,7 @@ public class CuboidPlugin extends Plugin {
 				}
 				else{
 					player.sendMessage(Colors.Yellow + "Usage : /rejectclaim <claimant> [reason]");
+					
 				}
 				
 				return true;
@@ -233,7 +238,7 @@ public class CuboidPlugin extends Plugin {
 				return true;
 			}
 		}
-		else if (etc.getInstance().canUseCommand(playerName, "/stakeclaim")){
+		else if (player.canUseCommand( "/stakeclaim")){
 			//!TODO!Replace this 
 			if ( split[0].equalsIgnoreCase("/stakeclaim" ) ){
 				if (Cuboid.isReady(playerName.toLowerCase(), true)){
@@ -249,7 +254,7 @@ public class CuboidPlugin extends Plugin {
 							player.sendMessage(Colors.LightGreen + "Protection will not work until you are contacted by and admin");
 							// Message admins
 							for  (Player p : etc.getServer().getPlayerList() ) {
-								if (etc.getInstance().canUseCommand(p.getName(), "/protect")){
+								if (player.canUseCommand("/protect")){
 									p.sendMessage("Player "+playerName+" has staked a claim!");
 									p.sendMessage("TP to them, and do /checkclaim "+playerName.toLowerCase()+" to see the claim");
 								}
@@ -279,7 +284,7 @@ public class CuboidPlugin extends Plugin {
 				return true;
 			}
 		}
-		if (etc.getInstance().canUseCommand(playerName, "/cuboid")){	
+		if (player.canUseCommand( "/cuboid")){	
 			if (split[0].equalsIgnoreCase("/csize")){
 				if ( Cuboid.isReady(playerName, true) ){
 					player.sendMessage(Colors.LightGreen +"The selected cuboid size is : " + Cuboid.calculerTaille(playerName) +" blocks" );
@@ -411,12 +416,12 @@ public class CuboidPlugin extends Plugin {
 		if ( blockPlaced.getType() == 19){ // NO MORE SPONGE!
 			return true;
 		}
-		else if ( itemInHand==269 && (etc.getInstance().canUseCommand(player.getName(), "/protect") || etc.getInstance().canUseCommand(player.getName(), "/cuboid")) ){
+		else if ( itemInHand==269 && (player.canUseCommand( "/protect") || player.canUseCommand( "/cuboid")) ){
 				boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 				player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
 				return true;
 		}
-		else if ( itemInHand==269 && etc.getInstance().canUseCommand(player.getName(), "/stakeclaim") ){
+		else if ( itemInHand==269 && player.canUseCommand( "/stakeclaim") ){
 				int[] blocks = Cuboid.getBlocks(player.getName().toLowerCase());
 				if ( blocks[0] == 19 && blocks[1] == 19 ) {
 					player.sendMessage(Colors.Rose + "Your previous claim is being processed, please wait" );	
@@ -437,7 +442,7 @@ public class CuboidPlugin extends Plugin {
 			return false;
 		}
 		else{
-			if ( ProtectedArea.toggle && !etc.getInstance().canIgnoreRestrictions(player.getName()) ){
+			if ( ProtectedArea.toggle && !player.canIgnoreRestrictions() ){
 				return isAllowed(player, blockClicked);
 			}
 		}
@@ -455,7 +460,7 @@ public class CuboidPlugin extends Plugin {
 			// Wood doors, buttons and levers
 			return false;
 		}
-		else if (ProtectedArea.toggle && !etc.getInstance().canIgnoreRestrictions(player.getName()) ){
+		else if (ProtectedArea.toggle && !player.canIgnoreRestrictions() ){
 			String playerName = player.getName();
 			boolean inList = false;
 			for (String p : playerList){
@@ -503,10 +508,8 @@ public class CuboidPlugin extends Plugin {
 					endIndex = cuboidOwners.length();
 				groupName = cuboidOwners.substring(groupIndex, endIndex);
 				
-				for (String group : player.getUser().Groups){
-					if (group.indexOf(groupName) != -1){
-						return false;
-					}
+				if (player.isInGroup(groupName) ){
+					return false;
 				}
 				cuboidOwners = cuboidOwners.substring(0, groupIndex-3) + cuboidOwners.substring(endIndex, cuboidOwners.length());
 				groupIndex = cuboidOwners.indexOf(" g:")+3;

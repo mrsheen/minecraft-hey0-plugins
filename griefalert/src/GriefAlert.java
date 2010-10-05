@@ -37,11 +37,11 @@ public class GriefAlert extends Plugin{
 	
 	public boolean onCommand(Player player, String[] split) {
 		String playername = player.getName();
-		if (etc.getInstance().canUseCommand(playername, "/griefalert")){
+		if (player.canUseCommand("/griefalert")){
 			if (split[0].equalsIgnoreCase("/griefalert")){
 				toggleAlertes=!toggleAlertes;
 				for  (Player p : etc.getServer().getPlayerList() ) {
-					if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
+					if (p.canUseCommand( "/griefalert")){
 						p.sendMessage(Colors.Yellow + "("+playername+") Antigrief alerts : "+ (toggleAlertes ? "enabled" : "disabled"));
 					}
 				}
@@ -60,7 +60,7 @@ public class GriefAlert extends Plugin{
 		
 		if ( toggleAlertes  && itemInHand != 280 && !GriefAlertData.useWatchIDs.isEmpty() ){
 			short blocIndexInList = GriefAlertData.isUseWatched(blockPlaced.getType());
-			if ( blocIndexInList>-1 && !etc.getInstance().canUseCommand(player.getName(), "/griefalert") ){
+			if ( blocIndexInList>-1 && !player.canUseCommand( "/griefalert") ){
 				//Boolean selfGrief = false;
 				String blocName = GriefAlertData.useWatchNames.get(blocIndexInList);
 				String playerName = player.getName();
@@ -78,7 +78,7 @@ public class GriefAlert extends Plugin{
 				// if (selfGrief) {
 					// log.info("Antigrief alarm (self-grief) : " + messageAlerte);
 					// for  (Player p : etc.getServer().getPlayerList() ) {
-						// if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
+						// if (p.canUseCommand("/griefalert")){
 							// p.sendMessage(Colors.Rose+"Self-Grief : "+messageAlerte);
 						// }
 					// }
@@ -87,14 +87,14 @@ public class GriefAlert extends Plugin{
 				
 					log.info("Antigrief alarm : " + messageAlerte);
 					for  (Player p : etc.getServer().getPlayerList() ) {
-						if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
+						if (p.canUseCommand( "/griefalert")){
 							p.sendMessage(Colors.Rose+messageAlerte);
 						}
 					}
 				// }
 			}
 		}
-		else if(itemInHand == 280 && etc.getInstance().canUseCommand(player.getName(), "/degriefstick")){
+		else if(itemInHand == 280 && player.canUseCommand("/degriefstick")){
 			world.e.d(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ(), 0);
 		}
 		return false;
@@ -106,7 +106,7 @@ public class GriefAlert extends Plugin{
 		if ( toggleAlertes  && !GriefAlertData.breakWatchIDs.isEmpty() ){
 			
 			short blocIndexInList = GriefAlertData.isBreakWatched(blocID);
-			if ( blocIndexInList>-1 && !etc.getInstance().canUseCommand(player.getName(), "/griefalert") ){
+			if ( blocIndexInList>-1 && !player.canUseCommand( "/griefalert") ){
 				
 				String playerName = player.getName();
 				boolean inList = false;
@@ -114,6 +114,8 @@ public class GriefAlert extends Plugin{
 					if (p==playerName)
 						inList = true;
 				}
+				
+				
 				
 				if (inList){
 					Block listedBlock = correspondingBloc.get(playerList.indexOf(playerName));
@@ -124,14 +126,39 @@ public class GriefAlert extends Plugin{
 						correspondingBloc.add(block);
 						
 						String blocName = GriefAlertData.breakWatchNames.get(blocIndexInList);
-						log.info("Antigrief alarm : "+playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName);
+						String messageAlerte = playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+block.getX()+","+block.getY()+","+block.getZ()+")";
 						
-						String messageAlerte = Colors.Rose+playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName;
-						for  (Player p : etc.getServer().getPlayerList() ) {
-							if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
-								p.sendMessage(messageAlerte);
+						log.info("Antigrief alarm : "+messageAlerte);
+			
+						// Buffer messages, to only send a small number
+						if (!etc.getServer().isTimerExpired("griefalert_initial:"+playerName.toLowerCase())) {
+							etc.getServer().setTimer("griefalert_repeat:"+playerName.toLowerCase(), 50);
+							// a.info("TimerInitialExpired" + this.e.aq.toLowerCase());
+							
+							for  (Player p : etc.getServer().getPlayerList() ) {
+								if (p.canUseCommand("/griefalert")){
+									p.sendMessage(messageAlerte);
+								}
 							}
 						}
+						else if (!etc.getServer().isTimerExpired("griefalert_repeat:"+playerName.toLowerCase()))
+						{
+							// a.info("TimerRepeatExpired" + this.e.aq.toLowerCase());
+							etc.getServer().setTimer("griefalert_repeat:"+playerName.toLowerCase(), 50);
+							for  (Player p : etc.getServer().getPlayerList() ) {
+								if (p.canUseCommand("/griefalert")){
+									p.sendMessage(messageAlerte);
+								}
+							}
+						}
+						else
+						{
+							//a.info("PlayerMoved time still running" + this.e.aq.toLowerCase());
+						}
+						etc.getServer().setTimer("griefalert_initial:"+playerName.toLowerCase(), 50);
+						
+						
+						
 					}
 				}
 				else{
@@ -139,14 +166,37 @@ public class GriefAlert extends Plugin{
 					correspondingBloc.add(block);
 					
 					String blocName = GriefAlertData.breakWatchNames.get(blocIndexInList);
-					log.info("Antigrief alarm : "+playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName);
+					String messageAlerte = playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+block.getX()+","+block.getY()+","+block.getZ()+")";
+					log.info("Antigrief alarm : "+messageAlerte);
 					
-					String messageAlerte = Colors.Rose+playerName+" is breaking "+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName;
-					for  (Player p : etc.getServer().getPlayerList() ) {
-						if (etc.getInstance().canUseCommand(p.getName(), "/griefalert")){
-							p.sendMessage(messageAlerte);
+					// Buffer messages, to only send a small number
+					if (!etc.getServer().isTimerExpired("griefalert_initial:"+playerName.toLowerCase())) {
+						etc.getServer().setTimer("griefalert_repeat:"+playerName.toLowerCase(), 50);
+						// a.info("TimerInitialExpired" + this.e.aq.toLowerCase());
+						
+						for  (Player p : etc.getServer().getPlayerList() ) {
+							if (p.canUseCommand("/griefalert")){
+								p.sendMessage(messageAlerte);
+							}
 						}
 					}
+					else if (!etc.getServer().isTimerExpired("griefalert_repeat:"+playerName.toLowerCase()))
+					{
+						// a.info("TimerRepeatExpired" + this.e.aq.toLowerCase());
+						etc.getServer().setTimer("griefalert_repeat:"+playerName.toLowerCase(), 50);
+						for  (Player p : etc.getServer().getPlayerList() ) {
+							if (p.canUseCommand("/griefalert")){
+								p.sendMessage(Colors.Rose+messageAlerte);
+							}
+						}
+					}
+					else
+					{
+						//a.info("PlayerMoved time still running" + this.e.aq.toLowerCase());
+					}
+					etc.getServer().setTimer("griefalert_initial:"+playerName.toLowerCase(), 50);
+					
+					
 				}
 			}
 		}

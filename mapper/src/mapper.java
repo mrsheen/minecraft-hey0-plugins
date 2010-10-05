@@ -122,7 +122,7 @@ public class mapper extends Plugin {
     }
 
     public boolean onCommand(Player player, String[] split) {
-        if (!etc.getInstance().canUseCommand(player.getName(), split[0]))
+        if (!player.canUseCommand(split[0]))
             return false;
         
 		if (split[0].equalsIgnoreCase("/newlabel")) {
@@ -270,13 +270,10 @@ public class mapper extends Plugin {
     public boolean onBlockDestroy(Player player, Block block) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    public void onPlayerMoved(Player player) {
 	
+	public void onPlayerMove(Player player, Location from, Location to) {
 		if (delLabel(playerPosFile, player.getName())) {}
-        if (saveLabel(playerPosFile, player.getName(), player.getX(), player.getY(), player.getZ(), 4)) { }
+        if (saveLabel(playerPosFile, player.getName(), to.x, to.y, to.z, 4)) { }
 		// Add to chunklist for render
-		
 	}
-	
 }
