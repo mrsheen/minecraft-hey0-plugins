@@ -45,7 +45,7 @@ public class StatsHandler extends MemoryHandler {
 		currentLogLines++;
 		//log.info("publish2: " + Integer.toString(currentLogLines));
 		
-		if (currentLogLines >= maxLogLines - 10) {
+		if (currentLogLines >= maxLogLines - 1) {
 			//log.info("Pushing : " + Integer.toString(currentLogLines) + Integer.toString(maxLogLines));
 			currentLogLines = 0;
 			// Condition occurred so dump buffered records
