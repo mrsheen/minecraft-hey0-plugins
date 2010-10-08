@@ -51,6 +51,7 @@ public class StatsHandler extends MemoryHandler {
 			// Condition occurred so dump buffered records
 			push();
 		}
+		
 	}
 	
 	public void setPlayerName(String player) {
@@ -60,7 +61,7 @@ public class StatsHandler extends MemoryHandler {
 	public boolean isLoggable(LogRecord record) {
 		Object[] params = record.getParameters();
 		
-		if (params[0].equals(logAction) && ((String)params[1]).equalsIgnoreCase(playerName)) {
+		if (((String)params[0]).equalsIgnoreCase(logAction) && ((String)params[1]).equalsIgnoreCase(playerName)) {
 			return true;
 		}
 		else {
@@ -69,4 +70,6 @@ public class StatsHandler extends MemoryHandler {
 		
 	}
 	
+	
 }
+

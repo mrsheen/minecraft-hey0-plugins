@@ -222,7 +222,14 @@ public class GriefAlert extends Plugin{
 	
 	public void sendAlert(String playerName, Location location, Block block, short blocIndexInList, boolean destroy) {
 	
-		String blocName = GriefAlertData.breakWatchNames.get(blocIndexInList);
+		String blocName = "";
+		if (destroy) {
+			blocName = GriefAlertData.breakWatchNames.get(blocIndexInList);
+		}
+		else
+		{
+			blocName = GriefAlertData.useWatchNames.get(blocIndexInList);
+		}
 		String locationName = setLocation(location);
 		
 		String messageAlerte = playerName+((destroy) ? " is breaking " : " used ")+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+block.getX()+","+block.getY()+","+block.getZ()+") - " + locationName;

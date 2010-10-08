@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.MemoryHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.LogRecord;
@@ -34,6 +35,7 @@ public class Stats extends Plugin {
 	
 	
 	static ArrayList<String> playerList = new ArrayList<String>();
+	static ArrayList<StatsHandler> playerLoggers = new ArrayList<StatsHandler>();
 	
 	private int maxLogLines;
 	private String logDir;
@@ -73,7 +75,8 @@ public class Stats extends Plugin {
 		}
 			
 		for  (Player p : etc.getServer().getPlayerList() ) {
-			createAllLoggers(p.getName().toLowerCase());
+			String playerName = p.getName().toLowerCase();
+			checkForLogger(playerName);
 			
 		}	
 		
@@ -101,6 +104,7 @@ public class Stats extends Plugin {
     
     
     public void disable() {
+		removeAllLoggers();
         log.info("[Stats] Mod Disabled.");
 		
     }
@@ -111,9 +115,7 @@ public class Stats extends Plugin {
 
     public void onLogin(Player player) {
 		String playerName = player.getName().toLowerCase();
-		if (!checkForLogger(playerName)) {
-			createAllLoggers(playerName);
-		}
+		checkForLogger(playerName);
 		
 		
 		String date = dateFormatLogEntry.format(new java.util.Date());
@@ -137,12 +139,13 @@ public class Stats extends Plugin {
     }
 	
 	public void onDisconnect(Player player) { 
+		String playerName = player.getName().toLowerCase();
 		String date = dateFormatLogEntry.format(new java.util.Date());
 		String location = Double.toString(player.getX()) + "," + Double.toString(player.getY()) + "," + Double.toString(player.getZ());
 		
 		String message = date;
 		message += " ";
-		message += player.getName().toLowerCase();
+		message += playerName;
 		message += " ";
 		message += location;
 		message += " ";
@@ -151,23 +154,25 @@ public class Stats extends Plugin {
 		
 		Object[] params = new Object[2];
 		params[0] = "connections";
-		params[1] = player.getName().toLowerCase();
+		params[1] = playerName;
 					
 		// Log to movements.log
-		statLogger.log(Level.INFO, message, params);
+		statLogger.log(Level.SEVERE, message, params);
+		removeLoggers(playerName);
 		
 		
 	
 	}
 
     public boolean onChat(Player player, String chatMessage) {
+		String playerName = player.getName().toLowerCase();
         String date = dateFormatLogEntry.format(new java.util.Date());
 		String location = Double.toString(player.getX()) + "," + Double.toString(player.getY()) + "," + Double.toString(player.getZ());
 		String messageLength = Integer.toString(chatMessage.length());
 		
 		String message = date;
 		message += " ";
-		message += player.getName().toLowerCase();
+		message += playerName;
 		message += " ";
 		message += location;
 		message += " ";
@@ -178,7 +183,7 @@ public class Stats extends Plugin {
 		
 		Object[] params = new Object[2];
 		params[0] = "actions";
-		params[1] = player.getName().toLowerCase();
+		params[1] = playerName;
 					
 		// Log to movements.log
 		statLogger.log(Level.INFO, message, params);
@@ -211,20 +216,59 @@ public class Stats extends Plugin {
     }
 
     public void onBan(Player player, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onIpBan(Player player, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onKick(Player player, String reason) {
+		String playerName = player.getName().toLowerCase();
         String date = dateFormatLogEntry.format(new java.util.Date());
 		String location = Double.toString(player.getX()) + "," + Double.toString(player.getY()) + "," + Double.toString(player.getZ());
 		
 		String message = date;
 		message += " ";
-		message += player.getName().toLowerCase();
+		message += playerName;
+		message += " ";
+		message += location;
+		message += " ";
+		message += "BAN";
+		message += "\n";
+		
+		Object[] params = new Object[2];
+		params[0] = "connections";
+		params[1] = playerName;
+					
+		// Log to movements.log
+		statLogger.log(Level.INFO, message, params);
+		removeLoggers(playerName);
+    }
+
+    public void onIpBan(Player player, String reason) {
+		String playerName = player.getName().toLowerCase();
+        String date = dateFormatLogEntry.format(new java.util.Date());
+		String location = Double.toString(player.getX()) + "," + Double.toString(player.getY()) + "," + Double.toString(player.getZ());
+		
+		String message = date;
+		message += " ";
+		message += playerName;
+		message += " ";
+		message += location;
+		message += " ";
+		message += "IPBAN";
+		message += "\n";
+		
+		Object[] params = new Object[2];
+		params[0] = "connections";
+		params[1] = playerName;
+					
+		// Log to movements.log
+		statLogger.log(Level.INFO, message, params);
+		removeLoggers(playerName);
+    }
+
+    public void onKick(Player player, String reason) {
+		String playerName = player.getName().toLowerCase();
+        String date = dateFormatLogEntry.format(new java.util.Date());
+		String location = Double.toString(player.getX()) + "," + Double.toString(player.getY()) + "," + Double.toString(player.getZ());
+		
+		String message = date;
+		message += " ";
+		message += playerName;
 		message += " ";
 		message += location;
 		message += " ";
@@ -233,10 +277,11 @@ public class Stats extends Plugin {
 		
 		Object[] params = new Object[2];
 		params[0] = "connections";
-		params[1] = player.getName().toLowerCase();
+		params[1] = playerName;
 					
 		// Log to movements.log
 		statLogger.log(Level.INFO, message, params);
+		removeLoggers(playerName);
     }
 	
     public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int item) { 
@@ -328,46 +373,76 @@ public class Stats extends Plugin {
 		// Add to summary
 		//!TODO!
 		
+		// Fields in summary
+		/*
+			total time logged in
+			longest time logged in
+			
+			
+			
+			total distance walked
+			
+			total block placed
+			
+			total blocks dug
+				dirt
+				stone
+				etc
+			
+			
+		
+		*/
 	}
 		
 	public void createAllLoggers(String playerName){
-			String playerDir = logDir + fileSep + "players" + fileSep + playerName;
-			try {
-				File logDirectory = new File(playerDir);
-				if (!logDirectory.exists())
-					logDirectory.mkdirs();
-			} catch (Exception e) {
-				log.log(Level.SEVERE, "[Stats] : Exception while creating Stats directory structure.", e);
-			}
+		String playerDir = logDir + fileSep + "players" + fileSep + playerName;
+		try {
+			File logDirectory = new File(playerDir);
+			if (!logDirectory.exists())
+				logDirectory.mkdirs();
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "[Stats] : Exception while creating Stats directory structure.", e);
+		}
+		
+		
+		
+		// Create loggers
+		playerLoggers.add(createLogger(playerName, playerDir, "movements", maxLogLines));
+		playerLoggers.add(createLogger(playerName, playerDir, "actions", maxLogLines));
+		playerLoggers.add(createLogger(playerName, playerDir, "connections", 0 ));
+		
 			
-			// Create logger
-			createLogger(playerName, playerDir, "movements", maxLogLines);
-			createLogger(playerName, playerDir, "actions", maxLogLines);
-			createLogger(playerName, playerDir, "connections", 0 );
+			
 	}
 	
 	
 	
-	public void createLogger(String playerName, String playerDir, String action, int bufferSize) {
+	public StatsHandler createLogger(String playerName, String playerDir, String action, int bufferSize) {
 		try {
 			// Create a memory handler with a memory of 200 records
 			// and dumps the records into the file my.log when a
 			// some abitrary condition occurs
 		
-			FileHandler fhandler = new FileHandler(playerDir + fileSep + action + dateFormatLogFile.format(new java.util.Date()) +".log");
+			FileHandler fhandler = new FileHandler(playerDir + fileSep + action + dateFormatLogFile.format(new java.util.Date()) +".log", true);
+			//!TODO! Add simple log format				
+			StatsFormatter formatter = new StatsFormatter();
+			fhandler.setFormatter(formatter);		
 							
 			StatsHandler mhandler = new StatsHandler(playerName, action, bufferSize, fhandler);
-		
+			mhandler.setFormatter(formatter);	
 			// Add to the desired logger
 			statLogger.addHandler(mhandler);
-		
+			return mhandler;
+			
 		} catch (Exception e) {
 			log.info("Exception" + e);
 		}
+		
+		return null;
 	}
 	
 	
-	private static boolean checkForLogger(String playerName){
+	private void checkForLogger(String playerName){
 		
 		boolean inList = false;
 		for (String p : playerList){
@@ -377,12 +452,55 @@ public class Stats extends Plugin {
 		
 		if (!inList){
 			playerList.add(playerName);
+			createAllLoggers(playerName);
+		}
+		
+		
+	}
+	
+	
+	private static void removeAllLoggers(){
+		
+		for (StatsHandler statsHandler : playerLoggers)
+		{
+				statsHandler.push();
+				statsHandler.flush();
+				statsHandler.close();
+		}
+		playerLoggers.clear();
+		playerList.clear();
+						
+	}
+	
+	private static void removeLoggers(String playerName){
+		
+		int playerIndex = playerList.indexOf(playerName);
+		if (playerIndex != -1) {
+			playerList.remove(playerIndex);
+			for (int i = 0; i < 3; i++) {
+				playerLoggers.get(playerIndex * 3).push();
+				playerLoggers.get(playerIndex * 3).flush();
+				playerLoggers.get(playerIndex * 3).close();
+				playerLoggers.remove(playerIndex * 3);
+			}
 			
 		}
-				
-		return inList;
-		
+						
 	}
 	
 }
 
+
+class StatsFormatter extends Formatter {
+    public String format(LogRecord record) {
+        return record.getMessage();
+    }
+
+    public String getHead(Handler h) {
+        return "";
+    }
+
+    public String getTail(Handler h) {
+        return "";
+    }
+}
