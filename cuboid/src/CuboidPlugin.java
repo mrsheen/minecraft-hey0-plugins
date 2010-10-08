@@ -413,8 +413,13 @@ public class CuboidPlugin extends Plugin {
 	}
 
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand){	
+		int targetBlockClickedType = blockClicked.getType();
 		if ( blockPlaced.getType() == 19){ // NO MORE SPONGE!
 			return true;
+		}
+		else if ( targetBlockClickedType == 64 || targetBlockClickedType == 69 || targetBlockClickedType == 77 ){
+			// Wood doors, buttons and levers
+			return false;
 		}
 		else if ( itemInHand==269 && (player.canUseCommand( "/protect") || player.canUseCommand( "/cuboid")) ){
 				boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
@@ -443,7 +448,7 @@ public class CuboidPlugin extends Plugin {
 		}
 		else{
 			if ( ProtectedArea.toggle && !player.canIgnoreRestrictions() ){
-				return isAllowed(player, blockClicked);
+				return isAllowed(player, blockPlaced) || isAllowed(player, blockClicked);
 			}
 		}
 		return false;
@@ -455,10 +460,6 @@ public class CuboidPlugin extends Plugin {
 		int targetBlockType = block.getType();
 		if ( targetBlockType == 19){ // NO MORE SPONGE!
 			return true;
-		}
-		else if ( targetBlockType == 64 || targetBlockType == 69 || targetBlockType == 77 ){
-			// Wood doors, buttons and levers
-			return false;
 		}
 		else if (ProtectedArea.toggle && !player.canIgnoreRestrictions() ){
 			String playerName = player.getName();
