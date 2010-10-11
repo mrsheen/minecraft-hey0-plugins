@@ -60,6 +60,25 @@ public class Cuboid {
 		return waitingClaims;
 	}
 	
+	
+	public static boolean setPoint(String playerName, int X, int Y, int Z, boolean firstPoint){
+		
+		int index = getPlayerIndex(playerName);
+		if ( !firstPoint ){
+			pointsCoordinates.set(index*6, X);
+			pointsCoordinates.set(index*6+1, Y);
+			pointsCoordinates.set(index*6+2, Z);
+		}
+		else{
+			pointsCoordinates.set(index*6+3, X);
+			pointsCoordinates.set(index*6+4, Y);
+			pointsCoordinates.set(index*6+5, Z);
+		}
+		selectionStatus.set(index, firstPoint);
+		return secondPoint;
+	}
+	
+	
 	public static boolean setPoint(String playerName, int X, int Y, int Z){
 		
 		int index = getPlayerIndex(playerName);

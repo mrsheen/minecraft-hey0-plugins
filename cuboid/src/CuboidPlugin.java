@@ -443,6 +443,50 @@ public class CuboidPlugin extends Plugin {
 				player.sendMessage(Colors.Yellow + "This area belongs to nobody");
 			return true;
 		}
+		else if ( itemInHand==288 ){
+			player.sendMessage(Colors.Yellow + "Begone, fire!");
+			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+8, blockClicked.getZ()+8);
+			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
+			if (whichPoint) {
+				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+8, blockClicked.getZ()+8);
+			}
+			int[] fireairparams = {51,0};
+			Cuboid.remplacerDansCuboid(player.getName(), fireairparams);
+			// Message admins
+			for  (Player p : etc.getServer().getPlayerList() ) {
+				if (player.canUseCommand("/protect")){
+					p.sendMessage(playerName+" just banished some fire!");
+				}
+			}
+			
+			return true;
+		}
+			// Feather 
+		else if ( itemInHand==288 ){
+			player.sendMessage(Colors.Yellow + "Begone, fire!");
+			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+128, blockClicked.getZ()+8);
+			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
+			if (whichPoint) {
+				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+128, blockClicked.getZ()+40);
+			}
+			int[] fireairparams = {51,0}; // change fire blocks to air
+			Cuboid.remplacerDansCuboid(player.getName(), fireairparams);
+			return true;
+		}
+		// String
+		else if ( itemInHand==287 ){
+			player.sendMessage(Colors.Yellow + "Begone, lava!");
+			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY()+128, blockClicked.getZ());
+			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
+			if (whichPoint) {
+				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY()+128, blockClicked.getZ());
+			}
+			int[] lavaairparams = {11,10,0}; // change lava source and flowing lava to air
+			Cuboid.remplacerDansCuboid(player.getName(), lavaairparams);
+			return true;
+		}
+			
+		
 		else if ( (itemInHand>269 && itemInHand<280) || itemInHand==256|| itemInHand==257|| itemInHand==258|| itemInHand==290|| itemInHand==291|| itemInHand==292|| itemInHand==293 ){
 			return false;
 		}

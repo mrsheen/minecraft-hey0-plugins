@@ -12,24 +12,19 @@ import java.util.logging.SimpleFormatter;
 /**
  * StatsHandler outputs contents to a the correct file, depending on the logrecord contents
  */
-public class StatsHandler extends MemoryHandler {
+public class StatsMemoryHandler extends MemoryHandler {
 
 
     protected static final Logger log = Logger.getLogger("Minecraft");
-	
-	private Handler fileHandler;
-	
-	private String playerName;
+
 	private String logAction;
 	private int maxLogLines;
 	
 	private int currentLogLines = 0;
 	
-	public StatsHandler(String player, String action, int buffer, Handler handler){
+	public StatsMemoryHandler(String action, int buffer, Handler handler){
 		
 		super(handler,buffer+10, Level.OFF);
-		fileHandler = handler;
-		playerName = player;
 		logAction = action;
 		maxLogLines = buffer;
 	}
@@ -54,14 +49,11 @@ public class StatsHandler extends MemoryHandler {
 		
 	}
 	
-	public void setPlayerName(String player) {
-		playerName = player;
-	}
-	
 	public boolean isLoggable(LogRecord record) {
-		Object[] params = record.getParameters();
+		StatsLogRecord logRecord = (StatsLogRecord)record;
 		
-		if (((String)params[0]).equalsIgnoreCase(logAction) && ((String)params[1]).equalsIgnoreCase(playerName)) {
+		
+		if (logRecord.table.equalsIgnoreCase(logAction)) {
 			return true;
 		}
 		else {
