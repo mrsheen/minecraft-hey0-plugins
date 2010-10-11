@@ -204,7 +204,7 @@ public class GriefAlert extends Plugin{
 						correspondingBloc.add(block);
 						
 						sendAlert(playerName, player.getLocation(), block, blocIndexInList, true);
-						return true;
+						return false;
 					}
 				}
 				else{
@@ -212,7 +212,7 @@ public class GriefAlert extends Plugin{
 					correspondingBloc.add(block);
 					
 					sendAlert(playerName,  player.getLocation(), block, blocIndexInList, true);
-					return true;
+					return false;
 				}
 			}
 		}
