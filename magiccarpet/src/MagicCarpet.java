@@ -82,13 +82,15 @@ public class MagicCarpet extends Plugin
 			return null;
 		}
 	}
-	public void enable()
-	{
-	}
 	
-	public void disable()
-	{
-	}
+    public void enable() {
+		a.info("[MagicCarpet] Mod Enabled.");
+    }
+
+    public void disable() {
+		a.info("[MagicCarpet] Mod Disabled");
+    }
+    
 
 	public boolean onCommand(Player player, String[] split)
 	{
