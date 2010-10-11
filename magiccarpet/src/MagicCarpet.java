@@ -93,7 +93,7 @@ public class MagicCarpet extends Plugin
 	public boolean onCommand(Player player, String[] split)
 	{
 		try {
-			if (split[0].equalsIgnoreCase("/magiccarpet") && player.canUseCommand("/magiccarpet")) {
+			if ((split[0].equalsIgnoreCase("/magiccarpet") || split[0].equalsIgnoreCase("/mc")) && player.canUseCommand("/magiccarpet")) {
 				Carpet carpet = (Carpet)carpets.get(player.getName());
 				if (carpet == null)
 				{
