@@ -96,7 +96,7 @@ public class StatsLogRecord extends LogRecord {
 	
 	
     public void setLogin() {
-		this.key = "Login";
+		this.key = "LOGIN";
 		this.table = "connections";
 		
     }	

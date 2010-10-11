@@ -81,7 +81,8 @@ public class StatsJDBCHandler extends Handler {
       //prepClear = connection.prepareStatement(clearSQL);
     
     } catch ( SQLException e ) {
-      System.err.println("Error on open: " + e);
+      log.log(Level.SEVERE, "Error on open",e);
+	  
     }
   }
 
@@ -96,24 +97,77 @@ public class StatsJDBCHandler extends Handler {
     }
   
   //Users
-    public void addAction(String playerName) {
-	
-		 /* // now store the log entry into the table
-		try {
-		  prepActionInsert.setInt(1,record.getLevel().intValue());
-		  prepInsert.setString(2,truncate(record.getLoggerName(),63));
-		  prepInsert.setString(3,truncate(record.getMessage(),255));
-		  prepInsert.setLong(4,record.getSequenceNumber());
-		  prepInsert.setString(5,truncate(record.getSourceClassName(),63));
-		  prepInsert.setString(6,truncate(record.getSourceMethodName(),31));
-		  prepInsert.setInt(7,record.getThreadID());
-		  prepInsert.setTimestamp(8,new Timestamp (System.currentTimeMillis()) );
-		  prepInsert.executeUpdate();
-		} catch ( SQLException e ) {
-		  System.err.println("Error on open: " + e);
+    public void addAction(StatsLogRecord logRecord) {
+		
+		// Switch on key
+		if (logRecord.key == "DESTROY") {
+				
+			}
+		else if (logRecord.key == "CREATE") {
+				
 		}
-		 */
+		else {	
+
+			log.info("Invalid key");
+
+		}
     }
+	
+	
+  //Users
+    public void addMovement(StatsLogRecord logRecord) {
+		
+		// Switch on key
+		if (logRecord.key == "MOVEMENT") {
+				//break;
+				//addAction(statsLogRecord); break;
+		}			
+		else {
+			log.info("Invalid key");
+				
+		}
+    }
+	
+	
+  //Users
+    public void addConnection(StatsLogRecord logRecord) {
+		
+		// Switch on key
+		if (logRecord.key ==  "LOGIN") {
+				
+				//addAction(statsLogRecord); break;
+			}	
+		else if (logRecord.key ==  "DISCONNECT") {
+				
+				//addAction(statsLogRecord); break;
+			}	
+		else if (logRecord.key == "KICK") {
+				
+				//addAction(statsLogRecord); break;
+			}	
+		else if (logRecord.key == "BAN") {
+				
+				//addAction(statsLogRecord); break;
+			}	
+		else if (logRecord.key == "IPBAN") {
+				
+				//addAction(statsLogRecord); break;
+			}	
+		else if (logRecord.key == "CHAT") {
+				
+				//addAction(statsLogRecord); break;
+			}		
+		else if (logRecord.key ==  "COMMAND") {
+				
+				//addAction(statsLogRecord); break;
+			}		
+		else {
+			log.info("Invalid key");
+				
+		}
+    }
+	
+	
   
   /**
    * Internal method used to truncate a string to a specified width.
@@ -144,10 +198,21 @@ public class StatsJDBCHandler extends Handler {
         return;
     }
 
-   // Switch on table
-   
-   
-   // Switch on key
+	StatsLogRecord statsLogRecord = (StatsLogRecord)record;
+	// Switch on table
+	if (statsLogRecord.table == "actions") {
+		addAction(statsLogRecord);
+	}
+	else if (statsLogRecord.table == "movements") {
+		addMovement(statsLogRecord); 
+	}
+	else if (statsLogRecord.table == "connections") {
+		addConnection(statsLogRecord);
+	}
+	else {
+		log.info("Invalid table");
+	}
+	
 
   }
 
