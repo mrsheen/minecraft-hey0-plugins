@@ -11,7 +11,7 @@
     <property name="run_dir" value="run"/>
     <path id="Minecraft-Server-Mod.classpath">
         <pathelement location="bin"/>
-		<pathelement location="/minecraft/src/my_mods/chrisinajar/Minecraft-Server-Mod/bin"/>
+		<pathelement location="/minecraft/src/my_mods/Minecraft-Server-Mod/bin"/>
         <pathelement location="run/minecraft_server.jar"/>
     </path>
 	
