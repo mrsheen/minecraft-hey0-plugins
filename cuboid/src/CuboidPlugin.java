@@ -443,7 +443,7 @@ public class CuboidPlugin extends Plugin {
 				player.sendMessage(Colors.Yellow + "This area belongs to nobody");
 			return true;
 		}
-		else if ( itemInHand==288 && player.canUseCommand("/time")){
+		else if ( itemInHand==288 && player.canUseCommand("/cuboid")){
 			player.sendMessage(Colors.Yellow + "Begone, fire!");
 			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+8, blockClicked.getZ()+8);
 			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
@@ -462,7 +462,7 @@ public class CuboidPlugin extends Plugin {
 			return true;
 		}
 		// String 
-		else if ( itemInHand==287 && player.canUseCommand("/time")){
+		else if ( itemInHand==287 && player.canUseCommand("/cuboid")){
 			player.sendMessage(Colors.Yellow + "Begone, lava!");
 			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY()+128, blockClicked.getZ());
 			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
