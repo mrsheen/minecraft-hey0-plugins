@@ -7,7 +7,7 @@ public class StatsLogRecord extends LogRecord {
 
 	public String key, playerName;
 	public Date timestamp;
-	public String[] command
+	public String[] command;
 	public String chatMessage, reason;
 	
 	public Block blockDestroyed;
@@ -17,14 +17,20 @@ public class StatsLogRecord extends LogRecord {
 	public int itemInHand;
 	
 	public double x,y,z,distance;
+	
+	public Location from, to;
 
+	public StatsLogRecord() {
+		this(Level.INFO, "unknown");
+	}
+	
 	public StatsLogRecord(Level level, String msg)
 	{
 		super(level, msg);
 	}
 
 	public StatsLogRecord(String name) {
-		StatsLogRecord(Level.INFO, name);
+		this(Level.INFO, name);
 		playerName = name;
 		timestamp = new java.util.Date();
 	}

@@ -74,9 +74,9 @@ public class Stats extends Plugin {
 		db = propertiesFile.getString("db", "mcstats");
 		
 		// Create loggers
-		createLogger("movements", maxLogLines));
-		createLogger("actions", maxLogLines));
-		createLogger("connections", 5 ));
+		createLogger("movements", maxLogLines);
+		createLogger("actions", maxLogLines);
+		createLogger("connections", 5 );
 		
 			
 		
@@ -92,7 +92,7 @@ public class Stats extends Plugin {
             log.log(Level.SEVERE, "[Stats] : Unable to find class " + driver, ex);
         }
         
-		connection = host+db+"?user="+user+"&password="+pass+"&database="+db;
+		connection = host+db+"?user="+username+"&password="+password+"&database="+db;
 		
         return true;
 		
@@ -143,6 +143,8 @@ public class Stats extends Plugin {
 		logRecord.setChat(chatMessage);
 		
 		statLogger.log(logRecord);
+		
+		return false;
     }
 
     public boolean onCommand(Player player, String[] split) {
@@ -151,6 +153,8 @@ public class Stats extends Plugin {
 		logRecord.setCommand(split);
 		
 		statLogger.log(logRecord);
+		
+		return false;
     }
 
     public void onBan(Player player, String reason) {
@@ -159,6 +163,8 @@ public class Stats extends Plugin {
 		logRecord.setBan(reason);
 		
 		statLogger.log(logRecord);
+		
+		
     }
 
     public void onIpBan(Player player, String reason) {
@@ -200,7 +206,7 @@ public class Stats extends Plugin {
 	
 		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
 		
-		logRecord.setMovement(from, to, Math.abs(fromLocation.x - toLocation.x) + Math.abs(fromLocation.y - toLocation.y) + Math.abs(fromLocation.z - toLocation.z));
+		logRecord.setMovement(fromLocation, toLocation, Math.abs(fromLocation.x - toLocation.x) + Math.abs(fromLocation.y - toLocation.y) + Math.abs(fromLocation.z - toLocation.z));
 		
 		statLogger.log(logRecord);
 	}
@@ -216,7 +222,7 @@ public class Stats extends Plugin {
 			StatsJDBCHandler jdbcHandler = new StatsJDBCHandler(driver,connection);
 
 			StatsMemoryHandler mhandler = new StatsMemoryHandler(table, bufferSize, jdbcHandler);
-			mhandler.setFormatter(formatter);	
+			
 			// Add to the desired logger
 			statLogger.addHandler(mhandler);
 
@@ -231,7 +237,7 @@ public class Stats extends Plugin {
 	{
 		for (Handler statsHandler : statLogger.getHandlers())
 		{
-				statsHandler.push();
+				((StatsMemoryHandler)statsHandler).push();
 				statsHandler.flush();
 				statsHandler.close();
 				statLogger.removeHandler(statsHandler);
