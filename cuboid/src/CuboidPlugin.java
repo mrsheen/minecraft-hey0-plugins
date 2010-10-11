@@ -455,7 +455,7 @@ public class CuboidPlugin extends Plugin {
 			// Message admins
 			for  (Player p : etc.getServer().getPlayerList() ) {
 				if (player.canUseCommand("/protect")){
-					p.sendMessage(playerName+" just banished some fire!");
+					p.sendMessage(player.getName()+" just banished some fire!");
 				}
 			}
 			

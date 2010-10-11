@@ -61,7 +61,7 @@ public class Cuboid {
 	}
 	
 	
-	public static boolean setPoint(String playerName, int X, int Y, int Z, boolean firstPoint){
+	public static void setPoint(String playerName, int X, int Y, int Z, boolean firstPoint){
 		
 		int index = getPlayerIndex(playerName);
 		if ( !firstPoint ){
@@ -75,7 +75,6 @@ public class Cuboid {
 			pointsCoordinates.set(index*6+5, Z);
 		}
 		selectionStatus.set(index, firstPoint);
-		return secondPoint;
 	}
 	
 	
