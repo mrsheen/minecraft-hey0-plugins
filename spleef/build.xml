@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="build" name="Spleef">
-    <property environment="env"/>
+   <property environment="env"/>
     <property name="version" value="65dev"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.5"/>
     <property name="source" value="1.5"/>
     <property name="build_dir" value="build"/>
 	<property name="deploy_dir" value="/minecraft/server/bin/plugins/"/>
-    <property name="release_dir" value="dist"/>
+    <property name="release_dir" value="../downloads/"/>
     <property name="run_dir" value="run"/>
     <path id="Minecraft-Server-Mod.classpath">
         <pathelement location="bin"/>
@@ -66,6 +66,10 @@
     </target>
     <target depends="create_jar" name='deploy'>
         <copy includeemptydirs="false" todir="${deploy_dir}">
+            <fileset dir="${build_dir}">
+            </fileset>
+        </copy>
+		<copy includeemptydirs="false" todir="${release_dir}">
             <fileset dir="${build_dir}">
             </fileset>
         </copy>
