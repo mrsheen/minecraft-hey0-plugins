@@ -8,12 +8,14 @@ import java.sql.*;
  * a JDK1.4 log handler that will write the
  * contents of the log to a JDBC data source.
  * 
- * ©author Jeff Heaton (http://www.jeffheaton.com)
- * ©version 1.0
- * ©since January 2002
+ * author Jeff Heaton (http://www.jeffheaton.com)
+ * version 1.0
+ * since January 2002
  */
 public class StatsJDBCHandler extends Handler {
 
+
+    protected static final Logger log = Logger.getLogger("Minecraft");
   /**
    * A string that contains the classname of the JDBC driver.
    * This value is filled by the constructor.
@@ -75,10 +77,9 @@ public class StatsJDBCHandler extends Handler {
 
       //Class.forName(driverString);
       connection = getConnection();
-      prepInsert = connection.prepareStatement(insertSQL);
-      prepClear = connection.prepareStatement(clearSQL);
-    } catch ( ClassNotFoundException e ) {
-      System.err.println("Error on open: " + e);
+      prepActionInsert = connection.prepareStatement(actionInsertSQL);
+      //prepClear = connection.prepareStatement(clearSQL);
+    
     } catch ( SQLException e ) {
       System.err.println("Error on open: " + e);
     }
@@ -97,7 +98,7 @@ public class StatsJDBCHandler extends Handler {
   //Users
     public void addAction(String playerName) {
 	
-		 // now store the log entry into the table
+		 /* // now store the log entry into the table
 		try {
 		  prepActionInsert.setInt(1,record.getLevel().intValue());
 		  prepInsert.setString(2,truncate(record.getLoggerName(),63));
@@ -111,7 +112,7 @@ public class StatsJDBCHandler extends Handler {
 		} catch ( SQLException e ) {
 		  System.err.println("Error on open: " + e);
 		}
-		
+		 */
     }
   
   /**
