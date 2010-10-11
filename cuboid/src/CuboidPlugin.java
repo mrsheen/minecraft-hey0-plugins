@@ -435,7 +435,7 @@ public class CuboidPlugin extends Plugin {
 				player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
 				return true;
 		}
-		else if ( itemInHand==268 ){
+		else if ( itemInHand==268 && (player.canUseCommand( "/time")){
 			String owners = ProtectedArea.inProtectedZone(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 			if (owners != null)
 				player.sendMessage(Colors.Yellow + "This area is owned by :"+Colors.White+owners);
@@ -443,7 +443,7 @@ public class CuboidPlugin extends Plugin {
 				player.sendMessage(Colors.Yellow + "This area belongs to nobody");
 			return true;
 		}
-		else if ( itemInHand==288 ){
+		else if ( itemInHand==288 && (player.canUseCommand( "/time")){
 			player.sendMessage(Colors.Yellow + "Begone, fire!");
 			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+8, blockClicked.getZ()+8);
 			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
