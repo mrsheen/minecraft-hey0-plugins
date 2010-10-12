@@ -57,16 +57,16 @@ public class MagicCarpet extends Plugin
 				return;
 			for(int i = 0; i < fibers.length; i++)
 			{
-				if (fibers[i].imadeit) etc.getServer().setBlockAt(0, (int)currentLoc.x + fibers[i].x - 1, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+				if (fibers[i].imadeit) etc.getServer().setBlockAt(0, (int)currentLoc.x + fibers[i].x , (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
 				fibers[i].imadeit = false;
 			}
 		}
 		public void drawCarpet() {
 			for(int i = 0; i < fibers.length; i++)
 			{
-				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)currentLoc.x + fibers[i].x - 1, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z).getType() == 0) {
+				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)currentLoc.x + fibers[i].x , (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z).getType() == 0) {
 					fibers[i].imadeit = true;
-					etc.getServer().setBlockAt(fibers[i].type, (int)currentLoc.x + fibers[i].x - 1, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+					etc.getServer().setBlockAt(fibers[i].type, (int)currentLoc.x + fibers[i].x , (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
 				} else {
 					fibers[i].imadeit = false;
 				}
