@@ -464,10 +464,10 @@ public class CuboidPlugin extends Plugin {
 		// String 
 		else if ( itemInHand==287 && player.canUseCommand("/cuboid")){
 			player.sendMessage(Colors.Yellow + "Begone, lava!");
-			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY()+128, blockClicked.getZ());
-			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
+			boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+2, blockClicked.getY()+128, blockClicked.getZ()+2);
+			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-2, blockClicked.getY(), blockClicked.getZ()-2);
 			if (whichPoint) {
-				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY()+128, blockClicked.getZ());
+				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX()+2, blockClicked.getY()+128, blockClicked.getZ()+2);
 			}
 			int[] lavaairparams = {11,10,0};
 			Cuboid.remplacerDansCuboid(player.getName(), lavaairparams);
