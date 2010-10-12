@@ -7,7 +7,7 @@ public class CuboidPlugin extends Plugin {
 	// Version 7 : 06/10 14h00 GMT+2
 	// for servermod 103 to 111
 	
-	// Pour trouver un nom de joueur connecté : getServer().matchPlayer(split[1]);
+	// Pour trouver un nom de joueur connecte : getServer().matchPlayer(split[1]);
 	
 	@SuppressWarnings("unused")
 	private String name = "CuboidPlugin";
@@ -17,7 +17,7 @@ public class CuboidPlugin extends Plugin {
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Boolean> lastStatus = new ArrayList<Boolean>();
 	static ArrayList<Block> correspondingBloc = new ArrayList<Block>();
-	static boolean logging = false;
+	public static boolean logging = false;
 	
 	public void enable(){
 		CuboidProtection.loadProtectedAreas();

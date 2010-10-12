@@ -25,7 +25,7 @@ public class Cuboid {
 			playerList.add(playerName);
 			selectionStatus.add(false);
 			undoAble.add(false);
-			pointsCoordinates.add(null);	// A faire : plus élégant
+			pointsCoordinates.add(null);	// A faire : plus elegant
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);

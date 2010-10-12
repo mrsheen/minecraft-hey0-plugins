@@ -84,11 +84,11 @@ public class CuboidProtection {
 		int[] firstPoint = Cuboid.getPoint(playerName, false);
 		int[] secondPoint = Cuboid.getPoint(playerName, true);
 		
-		if( firstPoint[1] == secondPoint[1] ){	// s'ils sont à la même hauteur
+		if( firstPoint[1] == secondPoint[1] ){	// s'ils sont a la meme hauteur
 			firstPoint[1]-=addedHeight;
 			secondPoint[1]+=addedHeight;
 		}
-		ProtectedCuboids.add(firstPoint[0]);	// Méthode plus élégante
+		ProtectedCuboids.add(firstPoint[0]);	// Methode plus elegante
 		ProtectedCuboids.add(firstPoint[1]);
 		ProtectedCuboids.add(firstPoint[2]);
 		ProtectedCuboids.add(secondPoint[0]);
