@@ -126,7 +126,7 @@ public class MagicCarpet extends Plugin
 		if(!carpet.getCenterFiber().imadeit)
 			return false;
 		Location from = player.getLocation();
-		if((int)from.x != (block.getX()+1) || ((int)from.y -1) != block.getY() || (int)from.z != block.getZ())
+		if((int)from.x != (block.getX()) || ((int)from.y -1) != block.getY() || (int)from.z != block.getZ())
 			return false;
 			
 		carpet.removeCarpet();
