@@ -511,7 +511,11 @@ public class CuboidPlugin extends Plugin {
 		}
 		else{
 			if ( ProtectedArea.toggle && !player.canIgnoreRestrictions() ){
-				return isAllowed(player, blockPlaced);
+				if( blockPlaced.getType()>1 && blockPlaced.getType()<85 ) {
+					return isAllowed(player, blockPlaced);
+				} else {
+					return isAllowed(player, blockPlaced) || isAllowed(player,blockClicked);
+				}
 			}
 		}
 		return false;
