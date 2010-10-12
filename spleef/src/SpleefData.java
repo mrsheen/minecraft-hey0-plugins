@@ -217,9 +217,11 @@ public class SpleefData {
 	
 	public static void listthespleefs(Player player)
 	{
-		for (int i = 0; i<spleefList.size(); i++)
-		{
-			player.sendMessage(spleefList.get(i));
+		if(spleefList.size()>0) {
+			for (int i = 0; i<spleefList.size(); i++)
+			{
+				player.sendMessage(spleefList.get(i));
+			}
 		}
 		return;
 	}
