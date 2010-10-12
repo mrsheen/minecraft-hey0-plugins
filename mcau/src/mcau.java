@@ -24,7 +24,12 @@ public class mcau extends Plugin {
 
 
     public boolean onCommand(Player player, String[] split) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    	if (split[0].equalsIgnoreCase("/whycantibuild")) {
+    		player.sendMessage("You can't build because I hate you");
+    		return true;
+    	} else {
+    		return false;
+    	}
         /*
         if (!player.canUseCommand(split[0])) {
             return false;
@@ -84,7 +89,7 @@ public class mcau extends Plugin {
 			player.sendMessage("You may see the item still, but no one else will be able to.");
 			return true;
 		} 		// Feather 
-		else if ( itemInHand==288 ){
+		else if ( itemInHand==288){
 			/*boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+128, blockClicked.getZ()+8);
 			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
 			if (whichPoint) {
@@ -104,7 +109,7 @@ public class mcau extends Plugin {
 			return true;
 		}
 		// String
-		else if ( itemInHand==287 ){
+		else if ( itemInHand==287){
 			for ( int i = (blockClicked.getX()-2); i<= blockClicked.getX()+2; i++ ){
 				for ( int j = blockClicked.getY(); j<= 128; j++ ){
 					for ( int k = (blockClicked.getZ()-2); k<= (blockClicked.getZ()+2); k++ ){
