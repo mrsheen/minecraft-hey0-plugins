@@ -13,7 +13,9 @@ public class mcau extends Plugin {
     private Properties  props; 
     private int[] disalloweditems;
     
-
+	
+	static ArrayList<String> whycantibuildplayerList = new ArrayList<String>();
+	static ArrayList<Block> whycantibuildlastBlock = new ArrayList<Block>();
 	
 	//protected area stuff
 	static ArrayList<String> playerList = new ArrayList<String>();
@@ -35,6 +37,7 @@ public class mcau extends Plugin {
 		etc.getInstance().addCommand("/stakeclaim", "<name of area> - Stake a claim");
 		etc.getInstance().addCommand("/grantclaim", "<playername> <name of area> - Grant a claim");
 		etc.getInstance().addCommand("/creload", "- Reloads the data file, in case you edited it manually");
+		etc.getInstance().addCommand("/whycantibuild", "- Explains why new users are unable to build");
     }
 
     public void disable() {
@@ -45,6 +48,8 @@ public class mcau extends Plugin {
 		etc.getInstance().removeCommand("/listprotected"); 
 		etc.getInstance().removeCommand("/removeprotected");
 		etc.getInstance().removeCommand("/toggleprot");
+		etc.getInstance().removeCommand("/whycantibuild");
+		
 		log.info("[mcau] Mod Disabled");
     }
     
@@ -85,6 +90,9 @@ public class mcau extends Plugin {
 
 		if (player.canUseCommand("/protect")){
 			if ( split[0].equalsIgnoreCase("/protect" ) ){
+				//
+				return false;
+				/*
 				if (Cuboidold.isReady(playerName, true)){
 					String parameters = "";
 					int paramSize = split.length;
@@ -114,7 +122,7 @@ public class mcau extends Plugin {
 				else{
 					player.sendMessage(Colors.Rose + "No cuboid has been selected");
 				}
-				return true;
+				return true;*/
 			}
 			else if ( split[0].equalsIgnoreCase("/grantclaim" ) ){
 				//!TODO! update this
@@ -223,6 +231,9 @@ public class mcau extends Plugin {
 			}
 			
 			else if (split[0].equalsIgnoreCase("/removeprotected")){
+				//
+				return false;
+				/*
 				if(split.length == 2){
 					short returnCode = ProtectedArea.removeProtectedZone(playerName, split[1].trim().toLowerCase() );
 					if (returnCode == 0){
@@ -241,26 +252,35 @@ public class mcau extends Plugin {
 				else{
 					player.sendMessage(Colors.Rose + "Usage : /removeprotected <protected area name>");
 				}
-				return true;
+				return true;*/
 			}
 			
 			else if (split[0].equalsIgnoreCase("/listprotected")){
+				//
+				return false;
+				/*
 				String cuboidList = ProtectedArea.listerCuboids();
 				player.sendMessage(Colors.Yellow + "Protected areas"+Colors.White+" :"+cuboidList);
-				return true;
+				return true;*/
 			}
 			
 			else if (split[0].equalsIgnoreCase("/toggleprot")){
+				//
+				return false;
+				/*
 				ProtectedArea.toggle=!ProtectedArea.toggle;
 				player.sendMessage(Colors.Yellow + "Cuboids protection : "+ (ProtectedArea.toggle ? "enabled" : "disabled"));
-				return true;
+				return true;*/
 			}
 			
 			else if (split[0].equalsIgnoreCase("/creload")){
+				//
+				return false;
+				/*
 				ProtectedArea.loadProtectedAreas();
 				ProtectedArea.loadClaimedAreas();
 				player.sendMessage(Colors.Green + "Cuboids coordinates reloaded");
-				return true;
+				return true;*/
 			}
 		}
 		else if (player.canUseCommand( "/stakeclaim")){
@@ -309,14 +329,14 @@ public class mcau extends Plugin {
 				return true;
 			}
 		}
+		
+		if (!player.canUseCommand("/canbuild") && split[0].equalsIgnoreCase("/whycantibuild")) {
+    		player.sendMessage("Add text here");
+    		return true;
+    	}
+		
 	    return false;
 	}
-    
-    /*
-    	else if (split[0].equalsIgnoreCase("/whycantibuild")) {
-    		player.sendMessage("You can't build because I hate you");
-    		return true;
-    	}*/
 
     public String onLoginChecks(String user) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -371,7 +391,7 @@ public class mcau extends Plugin {
 			
 		}
 		//feather
-		if ( itemInHand==288){
+		if ( itemInHand==288 && player.canUseCommand("/allowfirefeather")){
 			for ( int i = (blockClicked.getX()-8); i<= blockClicked.getX()+8; i++ ){
 				for ( int j = blockClicked.getY(); j<= 128; j++ ){
 					for ( int k = (blockClicked.getZ()-8); k<= (blockClicked.getZ()+8); k++ ){
@@ -384,7 +404,7 @@ public class mcau extends Plugin {
 			return true;
 		}
 		// String
-		else if ( itemInHand==287){
+		else if ( itemInHand==287 && player.canUseCommand("/allowlavastring")){
 			for ( int i = (blockClicked.getX()-2); i<= blockClicked.getX()+2; i++ ){
 				for ( int j = blockClicked.getY(); j<= 128; j++ ){
 					for ( int k = (blockClicked.getZ()-2); k<= (blockClicked.getZ()+2); k++ ){
@@ -437,6 +457,31 @@ public class mcau extends Plugin {
 	public boolean onBlockDestroy(Player player, Block block) {
 		//log.info ("[CuboidPlugin] "+player.getName()+" attempted block destroy");
 		//log.info ("[CuboidPlugin] protectedareas: "+ProtectedArea.toggle+" canIgnoreRestrictions: "+etc.getInstance().canIgnoreRestrictions(player.getName()));
+		if (!player.canUseCommand("/canbuild")) {
+			int normalplayerIndex = -1;
+			if(whycantibuildplayerList.size()>0) {
+				for(int i=0; i<whycantibuildplayerList.size(); i++) {
+					if( player.getName() == whycantibuildplayerList.get(i)) {
+						normalplayerIndex = i;
+					}
+				}
+			}
+			if(normalplayerIndex == -1) {
+				whycantibuildplayerList.add(player.getName());
+				whycantibuildlastBlock.add(block);
+				player.sendMessage("You will need to gain build access to destroy and place blocks.");
+				player.sendMessage("Please type '/whycantibuild' into chat to find out more.");
+			} else {
+				if(whycantibuildlastBlock.get(normalplayerIndex).getX()!=block.getX() || 
+					whycantibuildlastBlock.get(normalplayerIndex).getY()!=block.getY() || 
+					whycantibuildlastBlock.get(normalplayerIndex).getZ()!=block.getZ()) {
+					player.sendMessage("You will need to gain build access to destroy and place blocks.");
+					player.sendMessage("Please type '/whycantibuild' into chat to find out more.");
+					whycantibuildlastBlock.set(normalplayerIndex,block);
+					}
+			}
+			return true;
+		}
 		int targetBlockType = block.getType();
 		if ( targetBlockType == 19){ // NO MORE SPONGE!
 			return true;
