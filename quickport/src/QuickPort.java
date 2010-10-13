@@ -1,9 +1,14 @@
 import java.util.Hashtable;
 import java.util.List;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class QuickPort extends Plugin
 {
 	private Hashtable playerSettings = new Hashtable();
+	
+    protected static final Logger log = Logger.getLogger("Minecraft");
 	
 	private class QuickPortSettings
 	{
@@ -23,13 +28,19 @@ public class QuickPort extends Plugin
 		return(settings);
 	}
 	
-	public void enable()
-	{
-	}
-
-	public void disable()
-	{
-	}
+    public void enable() {
+	
+		log.info("[QuickPort] Mod Enabled.");
+		etc.getInstance().addCommand("/quickport", "Using a compass (345) in hand, left-click to teleport");
+		
+    }
+    
+    
+    public void disable() {
+		etc.getInstance().removeCommand("/quickport");
+		log.info("[QuickPort] Mod Disabled.");
+		
+    }
 	
 	//Hooking on arm animation to fire torch
 	public void onArmSwing(Player player)
