@@ -73,12 +73,6 @@ public class Stats extends Plugin {
         host = propertiesFile.getString("host", "jdbc:mysql://localhost:3306/");
 		db = propertiesFile.getString("db", "mcstats");
 		
-		// Create loggers
-		createLogger("movements", maxLogLines);
-		createLogger("actions", maxLogLines);
-		createLogger("connections", 5 );
-		
-			
 		
         try {
             propertiesFile.save();
@@ -94,6 +88,15 @@ public class Stats extends Plugin {
         
 		connection = host+db+"?user="+username+"&password="+password+"&database="+db;
 		
+		
+		
+		// Create loggers
+		createLogger("movements", maxLogLines);
+		createLogger("actions", maxLogLines);
+		createLogger("connections", 5 );
+		
+			
+			
         return true;
 		
 		

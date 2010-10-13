@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="mapper">
+<project basedir="." default="build" name="MapMarkers">
      <property environment="env"/>
     <property name="version" value="65dev"/>
     <property name="debuglevel" value="source,lines,vars"/>
@@ -11,8 +11,9 @@
     <property name="run_dir" value="run"/>
     <path id="Minecraft-Server-Mod.classpath">
         <pathelement location="bin"/>
-	<pathelement location="/minecraft/src/my_mods/Minecraft-Server-Mod/bin"/>
+		<pathelement location="/minecraft/src/my_mods/Minecraft-Server-Mod/bin"/>
         <pathelement location="run/minecraft_server.jar"/>
+		<pathelement location="run/json_simple-1.1.jar"/>
     </path>
 	
     <target name="init">
@@ -34,6 +35,7 @@
         <delete includeEmptyDirs="true">
             <fileset dir="run">
                 <exclude name="**/minecraft_server.jar"/>
+				<exclude name="**/json_simple-1.1.jar"/>
             </fileset>
         </delete>
     </target>
@@ -45,7 +47,7 @@
             </fileset>
         </delete>
     </target>
-    <target depends="init, get_vanilla_minecraft_server.jar" name="build">
+    <target depends="init, get_vanilla_minecraft_server.jar, get_json_simple.jar" name="build">
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin"
             source="${source}" target="${target}" includeantruntime="false">
             <src path="src"/>
@@ -56,10 +58,15 @@
         <get src="http://minecraft.net/download/minecraft_server.jar"
             dest="run/minecraft_server.jar" usetimestamp="true"/>
     </target>
+	 <target depends="init" name="get_json_simple.jar">
+        <get src="http://json-simple.googlecode.com/files/json_simple-1.1.jar"
+            dest="run/json_simple-1.1.jar" usetimestamp="true"/>
+    </target>
     <target depends="build" name="create_jar">
         <jar destfile="${build_dir}/${ant.project.name}.jar">
             <manifest>
                 <attribute name="Main-Class" value="Main"/>
+                <attribute name="Class-Path" value="json_simple-1.1.jar"/>
             </manifest>
 			<fileset dir="bin"/>
         </jar>
@@ -68,9 +75,16 @@
         <copy includeemptydirs="false" todir="${deploy_dir}">
             <fileset dir="${build_dir}">
             </fileset>
+			<fileset dir="${run_dir}">
+				<filename name="**/json_simple-1.1.jar"/>
+            </fileset>
+			
         </copy>
 		<copy includeemptydirs="false" todir="${release_dir}">
             <fileset dir="${build_dir}">
+            </fileset>
+			<fileset dir="${run_dir}">
+				<filename name="**/json_simple-1.1.jar"/>
             </fileset>
         </copy>
     </target>
