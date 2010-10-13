@@ -4,13 +4,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.io.*;
+import java.util.*;
+
 public class mcau extends Plugin {
 	static final Logger log = Logger.getLogger("Minecraft");
 	static Server world = etc.getServer();
+    private Properties  props; 
+    private int[] disalloweditems;
+    
+
+
 
 	
     public void enable() {
 		log.info("[mcau] Mod Enabled.");
+		loadprops();
 			//etc.getInstance().addCommand("/jump", "<Username> - Request a jump to a player");
 			//etc.getInstance().addCommand("/accept", "<Username> - Accept a jump from a player");
     }
@@ -21,6 +30,36 @@ public class mcau extends Plugin {
 		log.info("[mcau] Mod Disabled");
     }
     
+        private void loadprops()
+    {
+        props = new Properties();
+       	props.setProperty("disalloweditems", "19,66,328,342,343");
+        
+        try {
+             props.load(new FileInputStream("mcau.properties"));
+       	}
+        catch(IOException e) {
+             e.printStackTrace();
+        }
+        
+        if(props.getProperty("disalloweditems") != "") {
+       		String[] stringdisalloweditems = props.getProperty("disalloweditems").split(",");
+       		disalloweditems = new int[stringdisalloweditems.length];
+       		for (int i=0;i<stringdisalloweditems.length;i++) {
+       			disalloweditems[i] = Integer.parseInt(stringdisalloweditems[i]);
+       		}
+        	
+        }
+        
+		try {
+			OutputStream propOut = new FileOutputStream(new File("mcau.properties"));
+        	props.store(propOut, "Properties for the MCAU plugin");
+		}
+		catch(IOException e) {
+             e.printStackTrace();
+        }
+        return;
+    }
 
 
     public boolean onCommand(Player player, String[] split) {
@@ -30,17 +69,6 @@ public class mcau extends Plugin {
     	} else {
     		return false;
     	}
-        /*
-        if (!player.canUseCommand(split[0])) {
-            return false;
-        }
-
-        if (split[0].equalsIgnoreCase("/jump")) {
-        } else if (split[0].equalsIgnoreCase("/accept")) {
-        }
-        else {
-            return false;
-        }*/
     }
 
     public String onLoginChecks(String user) {
@@ -83,20 +111,19 @@ public class mcau extends Plugin {
     
     
 	public boolean onBlockCreate(Player player,Block blockPlaced,  Block blockClicked, int itemInHand) {
-		// block minecarts and tracks
-		if( itemInHand==328 || itemInHand==66 || itemInHand==19) {
-			player.sendMessage("The use of this item has been blocked, please don't attempt to use this item in the future.");
-			player.sendMessage("You may see the item still, but no one else will be able to.");
-			return true;
-		} 		// Feather 
-		else if ( itemInHand==288){
-			/*boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+128, blockClicked.getZ()+8);
-			boolean throwaway2 = Cuboid.setPoint(player.getName(), blockClicked.getX()-8, blockClicked.getY()-8, blockClicked.getZ()-8);
-			if (whichPoint) {
-				boolean throwaway1 = Cuboid.setPoint(player.getName(), blockClicked.getX()+8, blockClicked.getY()+128, blockClicked.getZ()+40);
+		// block items listed in the properties file
+		if(disalloweditems.length > 0 ) {
+			for (int i = 0; i<disalloweditems.length;i++) {
+				if (itemInHand == disalloweditems[i]) {
+					player.sendMessage("The use of this item has been blocked, please don't attempt to use this item in the future.");
+					player.sendMessage("You may see the item still, but no one else will be able to.");
+					return true;
+				}
 			}
-			int[] fireairparams = {51,0}; // change fire blocks to air
-			*/
+			
+		}
+		//feather
+		if ( itemInHand==288){
 			for ( int i = (blockClicked.getX()-8); i<= blockClicked.getX()+8; i++ ){
 				for ( int j = blockClicked.getY(); j<= 128; j++ ){
 					for ( int k = (blockClicked.getZ()-8); k<= (blockClicked.getZ()+8); k++ ){
