@@ -25,6 +25,9 @@ public class MapMarkers extends Plugin {
 	public Date oldDate;
 	public Calendar cal;
 	public String[] lineArray;
+	
+	static ArrayList<String> markerList = new ArrayList<String>();
+	static JSONArray markersArray = new JSONArray();
 
     protected static final Logger log = Logger.getLogger("Minecraft");
     private final String newLine = System.getProperty("line.separator");
@@ -51,7 +54,7 @@ public class MapMarkers extends Plugin {
             log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers properties file.", e);
         }
         
-        markersFile = properties.getProperty("playerpos", "world/markers.json");
+        markersFile = properties.getProperty("markers", "world/markers.json");
         
         String[] filesToCheck = { markersFile };
         for (String f : filesToCheck) {
@@ -72,6 +75,8 @@ public class MapMarkers extends Plugin {
 		
 		
         
+		loadMarkers();
+		
         return true;
 		
 		
@@ -104,12 +109,11 @@ public class MapMarkers extends Plugin {
 
     public void onLogin(Player player) {
 		try {
-			if (available.tryAcquire(3,TimeUnit.SECONDS)) {
-				updatePosition(player.getName(),player.getX(), player.getY(), player.getZ(), 4);
-				
-			}	
+			setMarker(player.getName(),player.getX(), player.getY(), player.getZ(), 4);
+			// Update file
+			writeMarkers();
 		}
-		catch (InterruptedException e) {
+		catch (Exception e) {
 			
 		}
 		
@@ -137,13 +141,10 @@ public class MapMarkers extends Plugin {
                     label += split[i];
             }
             
-            if (addLabel(label, player.getX(), player.getY(), player.getZ(), labelId)) {
-                log.info("[MapMarkers] "+player.getName()+" created a new label called "+split[1]+".");
-                player.sendMessage(Colors.Green + "Label Created!");
-            } else {
-                log.info("Exception while creating new label");
-                player.sendMessage(Colors.Rose + "[MapMarkers] Error Serverside");
-            }
+			setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
+			log.info("[MapMarkers] "+player.getName()+" created a new label called "+split[1]+".");
+            player.sendMessage(Colors.Green + "Label Created!");
+            
         }
 		else if (split[0].equalsIgnoreCase("/dellabel")) {
 		//!TODO!add error checking to delete only existing labels
@@ -157,13 +158,12 @@ public class MapMarkers extends Plugin {
                     label += split[i];
             }
             
-            if (delLabel(label)) {
-                log.info("[MapMarkers] "+player.getName()+" deleted a label called "+split[1]+".");
-                player.sendMessage(Colors.Green + "Label Deleted!");
-            } else {
-                log.info("Exception while deleting label");
-                player.sendMessage(Colors.Rose + "[MapMarkers] Error Serverside");
-            }
+			removeMarker(label);
+		
+			log.info("[MapMarkers] "+player.getName()+" deleted a label called "+split[1]+".");
+			player.sendMessage(Colors.Green + "Label Deleted!");
+		
+	  
         }
 		//!TODO!add listlabels
 		
@@ -183,158 +183,41 @@ public class MapMarkers extends Plugin {
     public void onKick(Player player, String reason) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-	
-    public boolean addLabel(String label, double x, double y, double z, int id) {
-        try {
-            File inFile = new File(markersFile);
-            BufferedReader fin = new BufferedReader(new FileReader(inFile));
-            
-			JSONParser parser = new JSONParser();
-			JSONArray markersArray = new JSONArray();
-
-			try{
-				Object obj= parser.parse(fin);
-				
-				markersArray =(JSONArray)obj;
-				
-				//Marker newLabel = new Marker(label, x, y, z, id);
-				JSONObject newLabel = new JSONObject();
-				newLabel.put("msg",label);
-				newLabel.put("x",x);
-				newLabel.put("y",y);
-				newLabel.put("z",z);
-				newLabel.put("id",id);
-				
-				markersArray.add(newLabel);
-			}
-			catch(ParseException pe){
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", pe);
-			}
-			catch (Exception e) {
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
-			}
-			
-            fin.close();
-			
-			BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
-            fout.write(markersArray.toString());
-            fout.close();
-            
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while deleting label", e);
-            return false;
-        }
-        return true;
-    }
     
-    public boolean delLabel(String label) {
-		try {
-            File inFile = new File(markersFile);
-            BufferedReader fin = new BufferedReader(new FileReader(inFile));
-            
-			date = new java.util.Date();
-			
-			JSONParser parser = new JSONParser();
-			JSONArray markersArray = new JSONArray();
-
-			try{
-				Object obj= parser.parse(fin);
-				
-				markersArray =(JSONArray)obj;
-				for(int i = 0; i < markersArray.size(); i++)
-				{
-					JSONObject marker = (JSONObject)markersArray.get(i);
-					if (marker.get("msg").equals(label)) {
-						markersArray.remove(i);
-						
-					}
-				}				
-			}
-			catch(ParseException pe){
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", pe);
-			}
-			catch (Exception e) {
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
-			}
-			
-            fin.close();
-			
-			BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
+    public synchronized boolean writeMarkers() {
+        try {
+		
+			/* BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
             fout.write(markersArray.toString());
             fout.close();
-            
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while deleting label", e);
-            return false;
-        }
-        return true;
-        
-    }
-	
-	
-	
-    public synchronized boolean updatePosition(String label, double x, double y, double z, int id) {
-        try {
-            File inFile = new File(markersFile);
-            BufferedReader fin = new BufferedReader(new FileReader(inFile));
-            
-			date = new java.util.Date();
-			boolean updated=false;
-			JSONParser parser = new JSONParser();
-			JSONArray markersArray = new JSONArray();
+			
+			return true; */
+			
+			// Work out 5 minutes ago
 
-			try{
-				Object obj= parser.parse(fin);
-				
-				markersArray =(JSONArray)obj;
-				for(int i = 0; i < markersArray.size(); i++)
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.MINUTE, -5);
+			date = cal.getTime();
+			
+			// Remove stale markers
+			try {
+				for(Object obj : markersArray)
 				{
 					try {
-						JSONObject marker = (JSONObject)markersArray.get(i);
-						if (marker.get("msg").equals(label)) {
-							// Line matches label, update
-							marker.put("x",x);
-							marker.put("y",y);
-							marker.put("z",z);
-							marker.put("timestamp",dateFormat.format(date));
-							updated=true;
+						JSONObject marker = (JSONObject)obj;
+						oldDate = dateFormat.parse ((String)marker.get("timestamp"));
+						if (oldDate.before(date)) {
+							removeMarker((String)marker.get("msg"));
 						}
-						else{
-							try {
-								oldDate = dateFormat.parse ((String)marker.get("timestamp"));
-								if (oldDate.after(date)) {
-									markersArray.remove(i);
-								}
-							}
-							catch(Exception e) {
-								//ee.printStackTrace();
-							}
-						}		
 					}
 					catch(Exception e) {
-								//ee.printStackTrace();
+						//ee.printStackTrace();
 					}
-					
 				}	
-				if (!updated) {
-					JSONObject newLabel = new JSONObject();
-					newLabel.put("msg",label);
-					newLabel.put("x",x);
-					newLabel.put("y",y);
-					newLabel.put("z",z);
-					newLabel.put("id",id);
-					
-					markersArray.add(newLabel);
-				}
-			}
-			catch(ParseException pe){
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", pe);
 			}
 			catch (Exception e) {
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
-			}
 			
-            fin.close();
+			}
 			
 			BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
             fout.write(markersArray.toString());
@@ -342,10 +225,10 @@ public class MapMarkers extends Plugin {
             
         } catch (Exception e) {
             log.log(Level.SEVERE, "[MapMarkers] : Exception while updating label", e);
-			available.release();
+		
             return false;
         }
-		available.release();
+		
         return true;
     }
     
@@ -359,29 +242,111 @@ public class MapMarkers extends Plugin {
 	
 	public void onPlayerMove(Player player, Location from, Location to) {
 		try {
+			setMarker(player.getName(),to.x, to.y, to.z, 4);
+			
 			if (available.tryAcquire()) {
-				updatePosition(player.getName(),to.x, to.y, to.z, 4);
+				// Update file
+				writeMarkers();
+				// Set timer to release in 3 secs
+				Timer timer = new Timer();
+				timer.schedule(new TimerTask() {
+						 public void run() {
+							available.release();
+						}
+					}
+					, 3*1000);
+
 			}	
 		}
 		catch (Exception e) {
 			
 		}
+		
 	}
 	
-	private class Marker  {
-		String msg; 
-		double x ;
-		double y;
-		double z ;
-		int id ;		
+	
+	private static int getMarkerIndex(String label){
 		
-		Marker (String label, double x, double y, double z, int id) {
-			this.msg = label; 
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.id = id;	
+		boolean inList = false;
+		for (String l : markerList){
+			if (l.equals(label))
+				inList = true;
 		}
+		
+		if (!inList){
+			markerList.add(label);
+			markersArray.add(new JSONObject());
+		}
+				
+		return markerList.indexOf(label);
+	}
+		
+	public void setMarker(String label, double x, double y, double z, int id)
+	{
+		setMarker(label, x, y, z,id, new java.util.Date());
+	}
+	
+	public void setMarker(String label, double x, double y, double z, int id, Date markerDate)
+	{
+		int index = getMarkerIndex(label);
+		JSONObject newMarker = new JSONObject();
+		newMarker.put("msg",label);
+		newMarker.put("x",x);
+		newMarker.put("y",y);
+		newMarker.put("z",z);
+		newMarker.put("id",id);
+		newMarker.put("timestamp",dateFormat.format(markerDate));
+		markersArray.set(index,newMarker);
+	}
+	
+	public void removeMarker(String label)
+	{
+		int index = getMarkerIndex(label);
+		markersArray.remove(index);
+		markerList.remove(index);
+	}
+	
+	public void loadMarkers() {
+		//!TODO!Load existing markers.json into array
+		JSONArray tempmarkersArray = new JSONArray();
+		try {
+            File inFile = new File(markersFile);
+            BufferedReader fin = new BufferedReader(new FileReader(inFile));
+            
+			JSONParser parser = new JSONParser();
+			
+
+			try{
+				Object obj= parser.parse(fin);
+				
+				tempmarkersArray =(JSONArray)obj;
+				
+				for(int i = 0; i < tempmarkersArray.size(); i++)
+				{
+					try {
+						JSONObject marker = (JSONObject)tempmarkersArray.get(i);
+						setMarker((String)marker.get("msg"), (Double)marker.get("x"), (Double)marker.get("y"), (Double)marker.get("z"), (Integer)marker.get("id"), dateFormat.parse((String)marker.get("timestamp")));
+					}
+					catch(Exception e) {
+								//ee.printStackTrace();
+					}
+					
+				}	
+
+			}
+			catch(ParseException pe){
+				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", pe);
+			}
+			catch (Exception e) {
+				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
+			}
+			
+            fin.close();
+			
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "[MapMarkers] : Exception while reading markers", e);
+        }
+        
 	}
 	
 }
