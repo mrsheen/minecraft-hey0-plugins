@@ -9,11 +9,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-
 @SuppressWarnings("serial")
 public class CuboidData implements Serializable {
-	// Version 7 : 06/10 14h00 GMT+2
-	// for servermod 103 to 111
+	// Version 9 : 14/10 11h45 GMT+2
+	// for servermod 115-116
 	
 	public String owner = "";
 	private String name ="";

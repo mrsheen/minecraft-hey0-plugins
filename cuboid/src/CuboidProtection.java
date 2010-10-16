@@ -9,8 +9,8 @@ import java.util.Scanner;
 import java.util.logging.Level;
 
 public class CuboidProtection {
-	// Version 7 : 06/10 14h00 GMT+2
-	// for servermod 103 to 111
+	// Version 9 : 14/10 11h45 GMT+2
+	// for servermod 115-116
 
 	static int addedHeight = 0;
 	
@@ -68,13 +68,11 @@ public class CuboidProtection {
 			
 		}
 	}
-		
-	public static short protegerCuboid(String playerName, String ownersList, String cuboidName){
-		
-		//	TODO Check chevauchements ?
-		
+			
+	public static byte protegerCuboid(String playerName, String ownersList, String cuboidName){
+				
 		for(String test : ProtectedCuboidsNames){
-			if(test.contains(cuboidName)){
+			if(test.equals(cuboidName)){
 				if (CuboidPlugin.logging)
 					CuboidPlugin.log.info(playerName+" failed to create a protected cuboid named "+cuboidName+" (aleady used)");
 				return 1;
@@ -99,7 +97,8 @@ public class CuboidProtection {
 			
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter("protectedCuboids.txt", true));
-			String newProtectedCuboid = firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]+","+secondPoint[2]+","+ownersList+","+cuboidName;
+			String newProtectedCuboid = firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]
+			       +","+secondPoint[2]+","+ownersList+","+cuboidName;
 			writer.append(newProtectedCuboid);
 			writer.newLine();
 			writer.close();
@@ -109,18 +108,77 @@ public class CuboidProtection {
 		}
 		if (CuboidPlugin.logging)
 			CuboidPlugin.log.info(playerName+" created a new protected cuboid named "+cuboidName);
+		
+		Cuboid.updateChestsState(firstPoint[0], firstPoint[1], firstPoint[2], secondPoint[0], secondPoint[1], secondPoint[2]);
+		
 		return 0;
 	}
 	
-	public static short removeProtectedZone(String playerName, String cuboidName){
+	public static byte moveProtection(String playerName, String cuboidName) {
+		
+		byte returnCode = 1;
+		
+		int[] firstPoint = Cuboid.getPoint(playerName, false);
+		int[] secondPoint = Cuboid.getPoint(playerName, true);
+		
+		for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
+			if( ProtectedCuboidsNames.get(i).equals(cuboidName) ){
+				Cuboid.updateChestsState(ProtectedCuboids.get(i*6), ProtectedCuboids.get(i*6+1), ProtectedCuboids.get(i*6+2)
+						, ProtectedCuboids.get(i*6+3), ProtectedCuboids.get(i*6+4), ProtectedCuboids.get(i*6+5));
+				ProtectedCuboids.set( (i*6) , firstPoint[0]);
+				ProtectedCuboids.set( (i*6)+1 , firstPoint[1]);
+				ProtectedCuboids.set( (i*6)+2 , firstPoint[2]);
+				ProtectedCuboids.set( (i*6)+3 , secondPoint[0]);
+				ProtectedCuboids.set( (i*6)+4 , secondPoint[1]);
+				ProtectedCuboids.set( (i*6)+5 , secondPoint[2]);
+				Cuboid.updateChestsState(firstPoint[0], firstPoint[1], firstPoint[2], secondPoint[0], secondPoint[1], secondPoint[2]);
+				if (returnCode==1){
+					returnCode=0;
+				}
+        	}
+		}
+		
+		File dataSource = new File("protectedCuboids.txt");
+		if (dataSource.exists()){
+			try {
+	            StringBuilder newFile = new StringBuilder();
+	            
+	            for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
+	            	newFile.append( firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]
+	            	    +","+secondPoint[2]+","+ProtectedCuboidsOwners.get(i)+","+ProtectedCuboidsNames.get(i) ).append("\r\n");
+	            }
+
+	            FileWriter writer = new FileWriter("protectedCuboids.txt");
+	            writer.write(newFile.toString());
+	            writer.close();
+    
+	        } catch (Exception ex) {
+	        	CuboidPlugin.log.log(Level.SEVERE, "A problem occured during cuboid rwriting", ex);
+	            return 2;
+	        }
+		}
+		else{
+			CuboidPlugin.log.log(Level.SEVERE,"protectedCuboids.txt seems to have been removed");
+			return 3;
+		}
+		
+		if (CuboidPlugin.logging)
+			CuboidPlugin.log.info(playerName+" moved a protected cuboid named "+cuboidName);
+
+		return returnCode;
+	}
+	
+	public static byte removeProtectedZone(String playerName, String cuboidName){
 		
 		ArrayList<String> oldProtectedCuboidsNames = ProtectedCuboidsNames;	        	
 		ProtectedCuboidsNames = new ArrayList<String>();
 		int indexToDel = -1;
 		int oldNumber = oldProtectedCuboidsNames.size();
         for (int i = 0; i < oldNumber; i++){
-        	if( oldProtectedCuboidsNames.get(i).contains(cuboidName) ){
+        	if( oldProtectedCuboidsNames.get(i).equals(cuboidName) ){
         		indexToDel=i;
+        		Cuboid.updateChestsState( ProtectedCuboids.get(i*6), ProtectedCuboids.get(i*6+1), ProtectedCuboids.get(i*6+2)
+        				, ProtectedCuboids.get(i*6+3), ProtectedCuboids.get(i*6+4), ProtectedCuboids.get(i*6+5));
         	}
         	else{
         		ProtectedCuboidsNames.add(oldProtectedCuboidsNames.get(i));
@@ -162,7 +220,7 @@ public class CuboidProtection {
 	            String line = "";
 	            while ((line = reader.readLine()) != null) {
 	            	String[] split = line.split(",");
-	            	if( split.length > 7 && !split[7].contains(cuboidName)){
+	            	if( split.length > 7 && !split[7].equals(cuboidName)){
 	            		newFile.append(line).append("\r\n");   
 	            	}
 	            }
@@ -184,6 +242,7 @@ public class CuboidProtection {
 		
 		if (CuboidPlugin.logging)
 			CuboidPlugin.log.info(playerName+" removed a protected cuboid named "+cuboidName);
+				
 		return 0;
 	}
 	
@@ -209,7 +268,7 @@ public class CuboidProtection {
 		// TODO : gestion par Octree
 		String lastEntry = null;
 		int pt1, pt2;
-		for ( int i = 0; i<ProtectedCuboidsOwners.size(); i++ ){
+		for ( int i = 0; i<ProtectedCuboidsNames.size(); i++ ){
 			pt1 = ProtectedCuboids.get(i*6+0);	// X
 			pt2 = ProtectedCuboids.get(i*6+3);
 			if ( isBetween(X, pt1, pt2) ){
@@ -219,7 +278,8 @@ public class CuboidProtection {
 					pt1 = ProtectedCuboids.get(i*6+1);	// Y = real Z
 					pt2 = ProtectedCuboids.get(i*6+4);
 					if ( isBetween(Y, pt1, pt2) ){
-						lastEntry= "name = "+ProtectedCuboidsNames.get(i)+", owners ="+ProtectedCuboidsOwners.get(i);
+						lastEntry= "name = "+ProtectedCuboidsNames.get(i)
+							+", owners ="+ProtectedCuboidsOwners.get(i);
 					}
 				}
 			}
@@ -251,10 +311,10 @@ public class CuboidProtection {
 		return null;
 	}
 	
-	public static byte addPlayer( String[] split, String protectedAreaName ){
+	public static byte addPlayer( String[] split, String protectedAreaName ){	//	TODO
 		byte returnCode = 1;
 		for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
-			if( ProtectedCuboidsNames.get(i).contains(protectedAreaName) ){
+			if( ProtectedCuboidsNames.get(i).equals(protectedAreaName) ){
 				String toChange = ProtectedCuboidsOwners.get(i);
 				
 				for (String playerName : split){
@@ -281,7 +341,7 @@ public class CuboidProtection {
 			            String line = "";
 			            while ((line = reader.readLine()) != null) {
 			            	String[] cuboidLine = line.split(",");
-			            	if( cuboidLine.length > 7 && !cuboidLine[7].contains(protectedAreaName)){
+			            	if( cuboidLine.length > 7 && !cuboidLine[7].equals(protectedAreaName)){
 			            		newFile.append(line).append("\r\n");   
 			            	}
 			            	else{
@@ -319,7 +379,7 @@ public class CuboidProtection {
 	public static byte removePlayer( String[] split, String protectedAreaName ){
 		byte returnCode = 1;
 		for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
-			if( ProtectedCuboidsNames.get(i).contains(protectedAreaName) ){
+			if( ProtectedCuboidsNames.get(i).equals(protectedAreaName) ){
 				String toChange = ProtectedCuboidsOwners.get(i);
 				
 				for (String playerName : split){
@@ -342,7 +402,7 @@ public class CuboidProtection {
 			            String line = "";
 			            while ((line = reader.readLine()) != null) {
 			            	String[] cuboidLine = line.split(",");
-			            	if( cuboidLine.length > 7 && !cuboidLine[7].contains(protectedAreaName)){
+			            	if( cuboidLine.length > 7 && !cuboidLine[7].equals(protectedAreaName)){
 			            		newFile.append(line).append("\r\n");   
 			            	}
 			            	else{
@@ -376,4 +436,5 @@ public class CuboidProtection {
 		}
 		return returnCode;
 	}
+
 }
