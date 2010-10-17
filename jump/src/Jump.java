@@ -94,7 +94,7 @@ public class Jump extends Plugin {
 					return true;
 				}
 				else {
-					sourceplayer.teleportTo(player);
+					sourceplayer.teleportTo((BaseEntity)player);
 					sourceplayer.sendMessage(Colors.Red + "Woosh!");
 					etc.getServer().setTimer(sourceplayer.getName().toLowerCase() + player.getName().toLowerCase(), 1);
 					return true;
