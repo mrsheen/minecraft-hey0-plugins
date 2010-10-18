@@ -9,12 +9,13 @@ import java.util.Scanner;
 import java.util.logging.Level;
 
 public class CuboidProtection {
-	// Version 9 : 14/10 11h45 GMT+2
-	// for servermod 115-116
+	// Version 10 : 17/10 11h00 GMT+2
+	// for servermod 116-117+
 
 	static int addedHeight = 0;
 	
 	static boolean toggle = true;
+	static boolean newestHavePriority = CuboidPlugin.newestHavePriority;
 	static ArrayList<Integer> ProtectedCuboids = new ArrayList<Integer>();
 	static ArrayList<String> ProtectedCuboidsNames = new ArrayList<String>();
 	static ArrayList<String> ProtectedCuboidsOwners = new ArrayList<String>();
@@ -82,11 +83,11 @@ public class CuboidProtection {
 		int[] firstPoint = Cuboid.getPoint(playerName, false);
 		int[] secondPoint = Cuboid.getPoint(playerName, true);
 		
-		if( firstPoint[1] == secondPoint[1] ){	// s'ils sont a la meme hauteur
+		if( firstPoint[1] == secondPoint[1] ){	// s'ils sont à la même hauteur
 			firstPoint[1]-=addedHeight;
 			secondPoint[1]+=addedHeight;
 		}
-		ProtectedCuboids.add(firstPoint[0]);	// Methode plus elegante
+		ProtectedCuboids.add(firstPoint[0]);	// Méthode plus élégante
 		ProtectedCuboids.add(firstPoint[1]);
 		ProtectedCuboids.add(firstPoint[2]);
 		ProtectedCuboids.add(secondPoint[0]);
@@ -278,8 +279,12 @@ public class CuboidProtection {
 					pt1 = ProtectedCuboids.get(i*6+1);	// Y = real Z
 					pt2 = ProtectedCuboids.get(i*6+4);
 					if ( isBetween(Y, pt1, pt2) ){
-						lastEntry= "name = "+ProtectedCuboidsNames.get(i)
-							+", owners ="+ProtectedCuboidsOwners.get(i);
+						if ( newestHavePriority ){
+							lastEntry = "name = "+ProtectedCuboidsNames.get(i) + ", owners ="+ProtectedCuboidsOwners.get(i);
+						}
+						else{
+							return "name = "+ProtectedCuboidsNames.get(i) + ", owners ="+ProtectedCuboidsOwners.get(i);
+						}
 					}
 				}
 			}
@@ -311,22 +316,25 @@ public class CuboidProtection {
 		return null;
 	}
 	
-	public static byte addPlayer( String[] split, String protectedAreaName ){	//	TODO
+	public static byte addPlayer( String[] split, String protectedAreaName ){
 		byte returnCode = 1;
 		for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
 			if( ProtectedCuboidsNames.get(i).equals(protectedAreaName) ){
+				
 				String toChange = ProtectedCuboidsOwners.get(i);
 				
 				for (String playerName : split){
-					if ( (playerName.indexOf("o:") != -1) && toChange.indexOf( " "+playerName.substring(2) )!= -1 ){
-						int startIndex = toChange.indexOf( " "+playerName.substring(2));
-						int endIndex = toChange.indexOf(" ", startIndex+1 );
-						if (endIndex == -1){
-							endIndex = toChange.length()-1;
+					if ( playerName.contains("o:") && toChange.contains( " "+playerName.substring(2) ) ){
+						String[] oldSplit = toChange.split(" ");
+						toChange = "";
+						for (String tempPlayer : oldSplit){
+							if( tempPlayer != null && !tempPlayer.equals("") && !tempPlayer.equals(playerName.substring(2)) ){
+								toChange += " "+tempPlayer;
+							}
 						}
-						toChange = toChange.substring(0, startIndex )+toChange.substring( endIndex, toChange.length() );
+						toChange += " "+playerName;	
 					}
-					if ( toChange.indexOf(" "+playerName) == -1 && toChange.indexOf("o:"+playerName) == -1 ){
+					else if ( !toChange.contains(" "+playerName) && !toChange.contains("o:"+playerName) ){
 						toChange += " "+playerName;
 					}
 				}
@@ -381,17 +389,19 @@ public class CuboidProtection {
 		for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
 			if( ProtectedCuboidsNames.get(i).equals(protectedAreaName) ){
 				String toChange = ProtectedCuboidsOwners.get(i);
-				
+								
 				for (String playerName : split){
-					if ( toChange.indexOf(" "+playerName) != -1 ){	// si existant
-						int startIndex = toChange.indexOf(" "+playerName);
-						int endIndex = toChange.indexOf(" ", startIndex+1 );
-						if (endIndex == -1){
-							endIndex = toChange.length()-1;
+					if ( toChange.contains(" "+playerName) ){
+						String[] oldSplit = toChange.split(" ");
+						toChange = "";
+						for (String tempPlayer : oldSplit){
+							if( tempPlayer != null && !tempPlayer.equals("") && !tempPlayer.equals(playerName) ){
+								toChange += " "+tempPlayer;
+							}
 						}
-						toChange = toChange.substring(0, startIndex )+toChange.substring( endIndex, toChange.length() );
 					}
 				}
+				
 				ProtectedCuboidsOwners.set(i, toChange);
 				
 				File dataSource = new File("protectedCuboids.txt");

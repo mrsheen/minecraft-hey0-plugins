@@ -1,15 +1,17 @@
 import java.util.ArrayList;
 
 public class Cuboid {
-	// Version 9 : 14/10 11h45 GMT+2
-	// for servermod 115-116
+	// Version 10 : 17/10 11h00 GMT+2
+	// for servermod 116-117+
 	static Server server = etc.getServer();
 		
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Boolean> selectionStatus = new ArrayList<Boolean>();
 	static ArrayList<Boolean> undoAble = new ArrayList<Boolean>();
 	static ArrayList<Integer> pointsCoordinates = new ArrayList<Integer>();
+	static ArrayList<int[][][]> lastCopiedCuboid = new ArrayList<int[][][]>();
 	static ArrayList<int[][][]> lastSelectedCuboid = new ArrayList<int[][][]>();
+	
 	static ArrayList<int[]> pastePoint = new ArrayList<int[]>();
 	static Object lock = new Object();
 		
@@ -25,13 +27,14 @@ public class Cuboid {
 			playerList.add(playerName);
 			selectionStatus.add(false);
 			undoAble.add(false);
-			pointsCoordinates.add(null);	// A faire : plus elegant
+			pointsCoordinates.add(null);	// A faire : plus élégant
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
-			lastSelectedCuboid.add(new int[][][]{});
+			lastCopiedCuboid.add(new int[][][]{});
+			lastSelectedCuboid.add(null);
 			pastePoint.add(new int[]{});
 		}
 				
@@ -61,7 +64,8 @@ public class Cuboid {
 			pointsCoordinates.set(index*6+3, X);
 			pointsCoordinates.set(index*6+4, Y);
 			pointsCoordinates.set(index*6+5, Z);
-			lastSelectedCuboid.set(index, new int[][][]{});
+			lastCopiedCuboid.set(index, new int[][][]{});
+			lastSelectedCuboid.set(index, null);
 			pastePoint.set(index, new int[]{});
 		}
 		selectionStatus.set(index, !secondPoint);
@@ -80,8 +84,36 @@ public class Cuboid {
 		return coords;
 	}
 	
-	public static int[] getCorner(String playerName, boolean secondCorner){		// TODO
-		return new int[]{};
+	public static int[] getCorners(int index, boolean twoCorners){
+		int[] corners;
+		if ( !twoCorners ){
+			if ( pointsCoordinates.get(index*6+3)==null ){
+				return new int[]{pointsCoordinates.get(index*6), pointsCoordinates.get(index*6+1), pointsCoordinates.get(index*6+2)};
+			}
+			corners = new int[3];
+			corners[0] = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ?
+					pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
+			corners[1] = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ?
+					pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
+			corners[2] = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? 
+					pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
+		}
+		else{
+			corners = new int[6];
+			corners[0] = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ?
+					pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
+			corners[1] = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ?
+					pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
+			corners[2] = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? 
+					pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
+			corners[3] = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3)  ) ?
+					pointsCoordinates.get(index*6+3) : pointsCoordinates.get(index*6);
+			corners[4] = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ?
+					pointsCoordinates.get(index*6+4) : pointsCoordinates.get(index*6+1);
+			corners[5] = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ?
+					pointsCoordinates.get(index*6+5) : pointsCoordinates.get(index*6+2);
+		}
+		return corners;
 	}
 	
 	public static boolean isReady(String playerName, boolean deuxPoints){
@@ -103,12 +135,10 @@ public class Cuboid {
 	
 	public static void copyCuboid(String playerName, boolean manual){
 		int index = getPlayerIndex(playerName);
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		int Xsize = Math.abs(pointsCoordinates.get(index*6+3)-pointsCoordinates.get(index*6))+1;
-		int Ysize = Math.abs(pointsCoordinates.get(index*6+4)-pointsCoordinates.get(index*6+1))+1;
-		int Zsize = Math.abs(pointsCoordinates.get(index*6+5)-pointsCoordinates.get(index*6+2))+1;
+		int[] corners = getCorners(index, true);
+		int Xsize = corners[3]-corners[0]+1;
+		int Ysize = corners[4]-corners[1]+1;
+		int Zsize = corners[5]-corners[2]+1;
 		// De Nord-Est vers Sud-Ouest
 		
 		int[][][] tableaux = new int[Xsize][][];
@@ -117,12 +147,12 @@ public class Cuboid {
 			for (int j = 0; j < Ysize; ++j) {
 				tableaux[i][j] = new int[Zsize];
 				 for (int k = 0; k < Zsize; ++k)
-					 tableaux[i][j][k] = server.getBlockIdAt( startX+i,startY+j,startZ+k );
+					 tableaux[i][j][k] = server.getBlockIdAt( corners[0]+i,corners[1]+j,corners[2]+k );
 			}
 		}
 		
-		lastSelectedCuboid.set(index, tableaux);
-		pastePoint.set(index, new int[]{startX, startY, startZ});
+		lastCopiedCuboid.set(index, tableaux);
+		pastePoint.set(index, new int[]{corners[0], corners[1], corners[2]});
 		if (!manual){
 			undoAble.set(index, true);
 		}
@@ -143,7 +173,7 @@ public class Cuboid {
 					 tableaux[i][j][k] = server.getBlockIdAt( Xmin+i,Ymin+j,Zmin+k );
 			}
 		}
-		lastSelectedCuboid.set(index, tableaux);
+		lastCopiedCuboid.set(index, tableaux);
 		pastePoint.set(index, new int[]{Xmin, Ymin, Zmin});
 		undoAble.set(index, true);
 	}
@@ -153,35 +183,76 @@ public class Cuboid {
 			int index = getPlayerIndex(playerName);
 			int[] startPoint = pastePoint.get(index);
 	
-			int[][][] tableau = lastSelectedCuboid.get(index);
-			int Xsize = tableau.length;
+			int[][][] toPaste = lastCopiedCuboid.get(index);
+			int Xsize = toPaste.length;
 			if (Xsize==0){
 				return 1;
 			}
-			int Ysize = tableau[0].length;
-			int Zsize = tableau[0][0].length;
+			int Ysize = toPaste[0].length;
+			int Zsize = toPaste[0][0].length;
 			// De Nord-Est vers Sud-Ouest
 					
-			for (int i = 0; i<Xsize; i++){
+			int[][][] beforePaste = new int[Xsize][][];
+			
+			for (int i = 0; i<Xsize; i++){	// TODO : refaction
+				beforePaste[i] = new int[Ysize][];
 				for (int j = 0; j < Ysize; ++j) {
+					beforePaste[i][j] = new int[Zsize];
 					 for (int k = 0; k < Zsize; ++k){
-						 server.setBlockAt( tableau[i][j][k], startPoint[0]+i,startPoint[1]+j,startPoint[2]+k );
+						 beforePaste[i][j][k] = server.getBlockIdAt(startPoint[0]+i,startPoint[1]+j,startPoint[2]+k);
+						 server.setBlockAt( toPaste[i][j][k], startPoint[0]+i,startPoint[1]+j,startPoint[2]+k );
 					 }
 				}
 			}
-			undoAble.set(index, false);	// TODO : rendre le paste reversible
+			
+			lastSelectedCuboid.set(index, beforePaste);
+			undoAble.set(index, true);
+			
+			return 0;
+		}
+	}
+	
+	public static byte undo(String playerName){
+		synchronized(lock){
+			int index = getPlayerIndex(playerName);
+			int[] startPoint = pastePoint.get(index);
+			int[][][] toPaste;
+	
+			if (lastSelectedCuboid.get(index) != null){
+				toPaste = lastSelectedCuboid.get(index);
+			}
+			else{
+				toPaste = lastCopiedCuboid.get(index);
+			}
+			
+			int Xsize = toPaste.length;
+			if (Xsize==0){
+				return 1;
+			}
+			int Ysize = toPaste[0].length;
+			int Zsize = toPaste[0][0].length;
+
+			for (int i = 0; i<Xsize; i++){
+				for (int j = 0; j < Ysize; ++j) {
+					 for (int k = 0; k < Zsize; ++k){
+						 server.setBlockAt( toPaste[i][j][k], startPoint[0]+i,startPoint[1]+j,startPoint[2]+k );
+					 }
+				}
+			}
+			
+			lastSelectedCuboid.set(index, null);
+			undoAble.set(index, false);
+			
 			return 0;
 		}
 	}
 	
 	public static byte saveCuboid(String playerName, String cuboidName){
 		int index = getPlayerIndex(playerName);
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		int Xsize = Math.abs(pointsCoordinates.get(index*6+3)-pointsCoordinates.get(index*6))+1;
-		int Ysize = Math.abs(pointsCoordinates.get(index*6+4)-pointsCoordinates.get(index*6+1))+1;
-		int Zsize = Math.abs(pointsCoordinates.get(index*6+5)-pointsCoordinates.get(index*6+2))+1;
+		int[] corners = getCorners(index, true);
+		int Xsize = corners[3]-corners[0]+1;
+		int Ysize = corners[4]-corners[1]+1;
+		int Zsize = corners[5]-corners[2]+1;
 		// De Nord-Est vers Sud-Ouest
 		
 		int[][][] tableaux = new int[Xsize][][];
@@ -190,7 +261,7 @@ public class Cuboid {
 			for (int j = 0; j < Ysize; ++j) {
 				tableaux[i][j] = new int[Zsize];
 				 for (int k = 0; k < Zsize; ++k)
-					 tableaux[i][j][k] = server.getBlockIdAt( startX+i,startY+j,startZ+k );
+					 tableaux[i][j][k] = server.getBlockIdAt( corners[0]+i,corners[1]+j,corners[2]+k );
 			}
 		}
 		return new CuboidData(playerName, cuboidName, tableaux).save();	
@@ -198,41 +269,30 @@ public class Cuboid {
 	
 	public static byte loadCuboid(String playerName, String cuboidName){
 		synchronized(lock){
-		int index = getPlayerIndex(playerName);
-		int startX, startY, startZ;
-		if ( pointsCoordinates.get(index*6+3)!=null ){
-			startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-			startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-			startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		}
-		else{
-			startX = pointsCoordinates.get(index*6);
-			startY = pointsCoordinates.get(index*6+1);
-			startZ = pointsCoordinates.get(index*6+2);
-		}
-		
-		CuboidData cuboid = new CuboidData(playerName, cuboidName);
-		
-		if (cuboid.loadReturnCode == 0){
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, false);
 			
-			int[][][] tableau = cuboid.getData();
-			int Xsize = tableau.length;
-			int Ysize = tableau[0].length;
-			int Zsize = tableau[0][0].length;
-			// De Nord-Est vers Sud-Ouest
+			CuboidData cuboid = new CuboidData(playerName, cuboidName);
 			
-			copyCuboid(playerName, startX, startX+Xsize, startY, startY+Ysize, startZ, startZ+Zsize);
+			if (cuboid.loadReturnCode == 0){
+				int[][][] tableau = cuboid.getData();
+				int Xsize = tableau.length;
+				int Ysize = tableau[0].length;
+				int Zsize = tableau[0][0].length;
+				// De Nord-Est vers Sud-Ouest
 				
-			for (int i = 0; i<Xsize; i++){
-				for (int j = 0; j < Ysize; ++j) {
-					 for (int k = 0; k < Zsize; ++k)
-						 server.setBlockAt( tableau[i][j][k], startX+i,startY+j,startZ+k );
+				copyCuboid(playerName, corners[0], corners[0]+Xsize, corners[1], corners[1]+Ysize, corners[2], corners[2]+Zsize);
+					
+				for (int i = 0; i<Xsize; i++){
+					for (int j = 0; j < Ysize; ++j) {
+						 for (int k = 0; k < Zsize; ++k)
+							 server.setBlockAt( tableau[i][j][k], corners[0]+i,corners[1]+j,corners[2]+k );
+					}
 				}
+	
 			}
-
-		}
-		
-		return cuboid.loadReturnCode;
+			
+			return cuboid.loadReturnCode;
 		}
 	}
 	
@@ -247,120 +307,177 @@ public class Cuboid {
 	
 	public static void viderCuboid(String playerName){
 		synchronized(lock){
-		int index = getPlayerIndex(playerName);
-		copyCuboid(playerName, false);
-		
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		
-		int endX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3)  ) ? pointsCoordinates.get(index*6+3) : pointsCoordinates.get(index*6);
-		int endY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+4) : pointsCoordinates.get(index*6+1);
-		int endZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+5) : pointsCoordinates.get(index*6+2);
-		
-		for ( int i = startX; i<= endX; i++ ){
-			for ( int j = startY; j<= endY; j++ ){
-				for ( int k = startZ; k<= endZ; k++ ){
-					server.setBlockAt(20,i,j,k);
-					server.setBlockAt(0,i,j,k);
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, true);
+			
+			copyCuboid(playerName, false);
+			
+			for ( int i = corners[0]; i<= corners[3]; i++ ){
+				for ( int j = corners[1]; j<= corners[4]; j++ ){
+					for ( int k = corners[2]; k<= corners[5]; k++ ){
+						server.setBlockAt(20,i,j,k);
+						server.setBlockAt(0,i,j,k);
+					}
 				}
 			}
-		}
-		if (CuboidPlugin.logging)
-			CuboidPlugin.log.info(playerName+" emptied a cuboid");
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+" emptied a cuboid");
 		}
 	}
 	
 	public static void remplirCuboid(String playerName, int bloctype){
 		synchronized(lock){
-		copyCuboid(playerName, false);
-		int index = getPlayerIndex(playerName);
-		
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		
-		int endX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3)  ) ? pointsCoordinates.get(index*6+3) : pointsCoordinates.get(index*6);
-		int endY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+4) : pointsCoordinates.get(index*6+1);
-		int endZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+5) : pointsCoordinates.get(index*6+2);
-		
-		for ( int i = startX; i<= endX; i++ ){
-			for ( int j = startY; j<= endY; j++ ){
-				for ( int k = startZ; k<= endZ; k++ ){
-					server.setBlockAt(bloctype,i,j,k);
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, true);
+			
+			copyCuboid(playerName, false);
+			
+			for ( int i = corners[0]; i<= corners[3]; i++ ){
+				for ( int j = corners[1]; j<= corners[4]; j++ ){
+					for ( int k = corners[2]; k<= corners[5]; k++ ){
+						server.setBlockAt(bloctype,i,j,k);
+					}
 				}
 			}
-		}
-		if (CuboidPlugin.logging)
-			CuboidPlugin.log.info(playerName+" filled a cuboid");
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+" filled a cuboid");
 		}
 	}
 	
 	public static void remplacerDansCuboid(String playerName, int[] replaceParams){
 		synchronized(lock){
-		copyCuboid(playerName, false);
-		int index = getPlayerIndex(playerName);
-				
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		
-		int endX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3)  ) ? pointsCoordinates.get(index*6+3) : pointsCoordinates.get(index*6);
-		int endY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+4) : pointsCoordinates.get(index*6+1);
-		int endZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+5) : pointsCoordinates.get(index*6+2);
-		
-		int targetBlockIndex = replaceParams.length-1;
-		for ( int i = startX; i<= endX; i++ ){
-			for ( int j = startY; j<= endY; j++ ){
-				for ( int k = startZ; k<= endZ; k++ ){
-					for ( int l = 0; l < targetBlockIndex; l++ ){
-						if( server.getBlockIdAt(i, j, k) == replaceParams[l] ){
-							server.setBlockAt(replaceParams[targetBlockIndex],i,j,k);
+			int index = getPlayerIndex(playerName);	
+			int[] corners = getCorners(index, true);
+			
+			copyCuboid(playerName, false);
+	
+			int targetBlockIndex = replaceParams.length-1;
+			for ( int i = corners[0]; i<= corners[3]; i++ ){
+				for ( int j = corners[1]; j<= corners[4]; j++ ){
+					for ( int k = corners[2]; k<= corners[5]; k++ ){
+						for ( int l = 0; l < targetBlockIndex; l++ ){
+							if( server.getBlockIdAt(i, j, k) == replaceParams[l] ){
+								server.setBlockAt(replaceParams[targetBlockIndex],i,j,k);
+							}
 						}
 					}
 				}
 			}
-		}
-		if (CuboidPlugin.logging)
-			CuboidPlugin.log.info(playerName+" replaced blocks inside a cuboid");
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+" replaced blocks inside a cuboid");
 		}
 	}
 	
 	public static void dessinerCuboid(String playerName, int bloctype, boolean sixFaces){
 		synchronized(lock){
-		copyCuboid(playerName, false);
-		int index = getPlayerIndex(playerName);
-		
-		int startX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3) ) ? pointsCoordinates.get(index*6) : pointsCoordinates.get(index*6+3);
-		int startY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+1) : pointsCoordinates.get(index*6+4);
-		int startZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+2) : pointsCoordinates.get(index*6+5);
-		
-		int endX = ( pointsCoordinates.get(index*6) <= pointsCoordinates.get(index*6+3)  ) ? pointsCoordinates.get(index*6+3) : pointsCoordinates.get(index*6);
-		int endY = ( pointsCoordinates.get(index*6+1) <= pointsCoordinates.get(index*6+4) ) ? pointsCoordinates.get(index*6+4) : pointsCoordinates.get(index*6+1);
-		int endZ = ( pointsCoordinates.get(index*6+2) <= pointsCoordinates.get(index*6+5) ) ? pointsCoordinates.get(index*6+5) : pointsCoordinates.get(index*6+2);
-	
-		for ( int i = startX; i<= endX; i++ ){
-			for ( int j = startY; j<= endY; j++ ){
-				server.setBlockAt(bloctype,i,j,startZ);
-				server.setBlockAt(bloctype,i,j,endZ);
-			}
-		}		
-		for ( int i = startY; i<= endY; i++ ){
-			for ( int j = startZ; j<= endZ; j++ ){
-				server.setBlockAt(bloctype,startX,i,j);
-				server.setBlockAt(bloctype,endX,i,j);
-			}
-		}
-		if (sixFaces){
-			for ( int i = startX; i<= endX; i++ ){
-				for ( int j = startZ; j<= endZ; j++ ){
-					server.setBlockAt(bloctype,i,startY,j);
-					server.setBlockAt(bloctype,i,endY,j);
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, true);
+			
+			copyCuboid(playerName, false);
+			
+			for ( int i = corners[0]; i<= corners[3]; i++ ){
+				for ( int j = corners[1]; j<= corners[4]; j++ ){
+					server.setBlockAt(bloctype,i,j,corners[2]);
+					server.setBlockAt(bloctype,i,j,corners[5]);
+				}
+			}		
+			for ( int i = corners[1]; i<= corners[4]; i++ ){
+				for ( int j = corners[2]; j<= corners[5]; j++ ){
+					server.setBlockAt(bloctype,corners[0],i,j);
+					server.setBlockAt(bloctype,corners[3],i,j);
 				}
 			}
+			if (sixFaces){
+				for ( int i = corners[0]; i<= corners[3]; i++ ){
+					for ( int j = corners[2]; j<= corners[5]; j++ ){
+						server.setBlockAt(bloctype,i,corners[1],j);
+						server.setBlockAt(bloctype,i,corners[4],j);
+					}
+				}
+			}
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+" built the "+((sixFaces)? "faces" : "walls")+" of a cuboid");
 		}
-		if (CuboidPlugin.logging)
-			CuboidPlugin.log.info(playerName+" built the "+((sixFaces)? "faces" : "walls")+" of a cuboid");
+	}
+	
+	public static void rotateCuboidContent(String playerName, int rotationType){
+		synchronized(lock){
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, true);
+			copyCuboid(playerName, false);
+			int[][][] cuboidContent = lastCopiedCuboid.get(index);
+			
+			if ( rotationType == 0){	// 90° clockwise
+				for ( int i = corners[0]; i<= corners[3]; i++ ){
+					for ( int j = corners[1]; j<= corners[4]; j++ ){
+						for ( int k = corners[2]; k<= corners[5]; k++ ){
+							server.setBlockAt(cuboidContent[i][j][k], i, j, k);
+						}
+					}
+				}
+			}
+			if ( rotationType == 1){	// 90° counet-clockwise
+				
+			}
+			if ( rotationType == 2){	//	180°
+				
+			}
+			if ( rotationType == 3){	// upside-down
+							
+			}
+			
+			// TODO
+			
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+"");
+		}
+	}
+	
+	public static void moveCuboidContent(String playerName, int movementType, int value){
+		synchronized(lock){
+			int index = getPlayerIndex(playerName);
+			int[] corners = getCorners(index, true);
+			copyCuboid(playerName, false);
+			int[][][] cuboidContent = lastCopiedCuboid.get(index);
+			int Xvalue = 0, Yvalue = 0, Zvalue = 0;
+						
+			if( movementType==0 ){	//	North
+				Xvalue-=value;
+			}
+			else if( movementType==1 ){	//	East
+				Zvalue-=value;
+			}
+			else if( movementType==2 ){	//	South
+				Xvalue+=value;	
+			}
+			else if( movementType==3 ){	//	West
+				Zvalue+=value;
+			}
+			else if( movementType==4 ){	// Up
+				Yvalue+=value;
+			}
+			else if( movementType==5 ){	//	Down
+				Yvalue-=value;
+			}
+			
+			//	copyCuboid(playerName, corners[0], corners[3], corners[1], corners[4], corners[2], corners[5]);
+			// TODO : définition des limites extradées
+			
+			//int[][][] beforeOperation = new int[Xsize][][];
+			for ( int i = corners[0]; i<= corners[3]; i++ ){
+				for ( int j = corners[1]; j<= corners[4]; j++ ){
+					for ( int k = corners[2]; k<= corners[5]; k++ ){
+						server.setBlockAt(cuboidContent[i][j][k], i+Xvalue, j+Yvalue, k+Zvalue);
+					}
+				}
+			}
+						
+			//lastCopiedCuboid.set(index, beforeOperation);
+			
+			//	TODO : suppression de ce qui est hors du nouveau cuboid
+			
+			if (CuboidPlugin.logging)
+				CuboidPlugin.log.info(playerName+" moved a cuboid for "+value+" block(s)");
 		}
 	}
 	

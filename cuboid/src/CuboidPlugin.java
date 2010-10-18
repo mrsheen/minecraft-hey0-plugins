@@ -4,8 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CuboidPlugin extends Plugin {
-	// Version 9 : 14/10 11h45 GMT+2
-	// for servermod 115-116
+	// Version 10 : 17/10 11h00 GMT+2
+	// for servermod 116-117+
 		
 	public String name = "CuboidPlugin";
 	
@@ -17,21 +17,32 @@ public class CuboidPlugin extends Plugin {
 	static boolean logging = false;
 	static boolean protectionWarn = false;
 	static boolean chestProtection = true;
+	static boolean newestHavePriority = true;
+	static int mainToolID = 269;
+	static int checkToolID = 268;
 	
 	public void enable(){
-		CuboidProtection.loadProtectedAreas();
-		PropertiesFile properties = new PropertiesFile("server.properties");
-		try {
-			CuboidProtection.addedHeight = properties.getInt("minProtectedHeight", 0);
-			logging = properties.getBoolean("cuboidLogging", false);
-			protectionWarn = properties.getBoolean("cuboidProtectionWarn", false);
-			chestProtection = properties.getBoolean("cuboidchestProtection", true);
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "Exception while reading from server.properties", e);
-        }
+		loadProperties();
+        CuboidProtection.loadProtectedAreas();
 	}
 	
 	public void disable(){
+	}
+	
+	private void loadProperties(){
+		PropertiesFile properties = new PropertiesFile("cuboidPlugin.properties");
+		try {
+			CuboidProtection.addedHeight = properties.getInt("minProtectedHeight", 0);
+			logging = properties.getBoolean("fullLogging", false);
+			protectionWarn = properties.getBoolean("protectionWarning", false);
+			chestProtection = properties.getBoolean("chestProtection", true);
+			newestHavePriority = properties.getBoolean("newestHavePriority", true);
+			mainToolID = properties.getInt("mainToolID", 269);
+			checkToolID = properties.getInt("checkToolID", 268);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Exception while reading from server.properties", e);
+        }
+        // TODO : non-existant file
 	}
 	
 	////////////////////////
@@ -642,7 +653,7 @@ public class CuboidPlugin extends Plugin {
 				
 				else if (split[0].equalsIgnoreCase("/undo")){
 					if (Cuboid.isUndoAble(playerName)){
-						Cuboid.paste(playerName);
+						Cuboid.undo(playerName);
 						player.sendMessage(Colors.Green + "Your last action has been undone !");
 					}
 					else{
@@ -809,12 +820,12 @@ public class CuboidPlugin extends Plugin {
 	
 		public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand){		
 			
-			if ( itemInHand==269 && (player.canUseCommand("/protect") || player.canUseCommand("/cuboid")) ){
+			if ( itemInHand==mainToolID && (player.canUseCommand("/protect") || player.canUseCommand("/cuboid")) ){
 					boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 					player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
 					return true;
 			}
-			else if ( itemInHand==268 ){
+			else if ( itemInHand==checkToolID ){
 				String owners = CuboidProtection.inProtectedZone(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 				if (owners != null)
 					player.sendMessage(Colors.Yellow + "Area infos : "+Colors.White+owners);
@@ -822,7 +833,7 @@ public class CuboidPlugin extends Plugin {
 					player.sendMessage(Colors.Yellow + "This area belongs to nobody");
 				return true;
 			}
-			else if ( (itemInHand>269 && itemInHand<280) || itemInHand==256|| itemInHand==257|| itemInHand==258|| itemInHand==290|| itemInHand==291|| itemInHand==292|| itemInHand==293 ){
+			else if ( (itemInHand>267 && itemInHand<280) || itemInHand==256|| itemInHand==257|| itemInHand==258|| itemInHand==290|| itemInHand==291|| itemInHand==292|| itemInHand==293 ){
 				return false;
 			}
 			else{
