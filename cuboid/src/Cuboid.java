@@ -27,7 +27,7 @@ public class Cuboid {
 			playerList.add(playerName);
 			selectionStatus.add(false);
 			undoAble.add(false);
-			pointsCoordinates.add(null);	// A faire : plus élégant
+			pointsCoordinates.add(null);	// A faire : plus lgant
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
@@ -407,7 +407,7 @@ public class Cuboid {
 			copyCuboid(playerName, false);
 			int[][][] cuboidContent = lastCopiedCuboid.get(index);
 			
-			if ( rotationType == 0){	// 90° clockwise
+			if ( rotationType == 0){	// 90 clockwise
 				for ( int i = corners[0]; i<= corners[3]; i++ ){
 					for ( int j = corners[1]; j<= corners[4]; j++ ){
 						for ( int k = corners[2]; k<= corners[5]; k++ ){
@@ -416,10 +416,10 @@ public class Cuboid {
 					}
 				}
 			}
-			if ( rotationType == 1){	// 90° counet-clockwise
+			if ( rotationType == 1){	// 90 counet-clockwise
 				
 			}
-			if ( rotationType == 2){	//	180°
+			if ( rotationType == 2){	//	180
 				
 			}
 			if ( rotationType == 3){	// upside-down
@@ -461,7 +461,7 @@ public class Cuboid {
 			}
 			
 			//	copyCuboid(playerName, corners[0], corners[3], corners[1], corners[4], corners[2], corners[5]);
-			// TODO : définition des limites extradées
+			// TODO : dfinition des limites extrades
 			
 			//int[][][] beforeOperation = new int[Xsize][][];
 			for ( int i = corners[0]; i<= corners[3]; i++ ){

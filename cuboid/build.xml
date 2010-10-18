@@ -47,7 +47,7 @@
     </target>
     <target depends="init, get_vanilla_minecraft_server.jar" name="build">
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin"
-            source="${source}" target="${target}" includeantruntime="false">
+            source="${source}" target="${target}" includeantruntime="false" encoding="UTF8">
             <src path="src"/>
 			<classpath refid="Minecraft-Server-Mod.classpath"/>
         </javac>

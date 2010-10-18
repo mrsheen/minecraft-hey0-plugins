@@ -80,7 +80,7 @@ public class CuboidPlugin extends Plugin {
 			}
 	
 			if (warn && protectionWarn){
-				player.sendMessage(Colors.Rose+"This block is protected !" );
+				player.sendMessage("§4"+"This block is protected !" );
 			}
 			return true;
 		}
@@ -822,7 +822,7 @@ public class CuboidPlugin extends Plugin {
 			
 			if ( itemInHand==mainToolID && (player.canUseCommand("/protect") || player.canUseCommand("/cuboid")) ){
 					boolean whichPoint = Cuboid.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
-					player.sendMessage(Colors.Blue + ((!whichPoint) ? "First" : "Second")+ " point is set." );	
+					player.sendMessage("" + ((!whichPoint) ? "§4First" : "Second")+ " point is set." );	
 					return true;
 			}
 			else if ( itemInHand==checkToolID ){
