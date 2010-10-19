@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Jump extends Plugin {
+    private JumpListener listener = new JumpListener();
 
 
 	static final Logger log = Logger.getLogger("Minecraft");
@@ -22,8 +23,13 @@ public class Jump extends Plugin {
 		log.info("[Jump] Mod Disabled");
     }
     
+    public void initialize() {
+    	etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
+    }
+    
 
-
+    public class JumpListener extends PluginListener
+    {
     public boolean onCommand(Player player, String[] split) {
         if (!player.canUseCommand(split[0])) {
             return false;
@@ -116,17 +122,7 @@ public class Jump extends Plugin {
             return false;
         }
     }
-
-    public String onLoginChecks(String user) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onLogin(Player player) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean onChat(Player player, String message) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    	
     }
     
     public List<Player> getPlayersWithPrefix(String playerName)
@@ -142,25 +138,5 @@ public class Jump extends Plugin {
         }
     	return players;
     }
-
-    public void onBan(Player player, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onIpBan(Player player, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onKick(Player player, String reason) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-	public boolean onBlockCreate(Player arg0, Block arg1) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean onBlockDestroy(Player arg0, Block arg1) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
 
 }
