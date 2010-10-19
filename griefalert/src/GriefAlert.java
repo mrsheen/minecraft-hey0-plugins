@@ -13,6 +13,8 @@ public class GriefAlert extends Plugin{
 	private String name = "GriefAlert";
 	
 	
+    private GriefAlertListener listener = new GriefAlertListener();
+	
 	public PropertiesFile propertiesFile;
 	
 	static MinecraftServer world = etc.getMCServer();
@@ -108,7 +110,15 @@ public class GriefAlert extends Plugin{
 		log.info("[GriefAlert] Mod Disabled");
     }
     
-	
+    public void initialize() {
+        etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, listener, this, PluginListener.Priority.MEDIUM);
+    	
+    }
+    
+	    public class GriefAlertListener extends PluginListener
+    {
 	public boolean onCommand(Player player, String[] split) {
 		String playername = player.getName();
 		if (player.canUseCommand("/griefalert")){
@@ -219,6 +229,8 @@ public class GriefAlert extends Plugin{
 		
 		return false;
 	}
+	
+    }
 	
 	public void sendAlert(String playerName, Location location, Block block, short blocIndexInList, boolean destroy) {
 	
