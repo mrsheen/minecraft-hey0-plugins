@@ -1,207 +1,221 @@
 import java.util.Hashtable;
 import java.util.List;
+import java.util.ArrayList;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+/*
+ * QUICKPORT v0.2.0
+ */
 
 public class QuickPort extends Plugin
 {
-	private Hashtable playerSettings = new Hashtable();
-	
-    protected static final Logger log = Logger.getLogger("Minecraft");
-	
-	private class QuickPortSettings
-	{
-		public Player targetPlayer;
-	}
-	
-	//Returns a QuickPortSettings for the player, making a new one if it has to
-	public QuickPortSettings getSettings(Player player)
-	{
-		QuickPortSettings settings = (QuickPortSettings)playerSettings.get(player.getName());
-		if (settings == null)
-		{
-			playerSettings.put(player.getName(), new QuickPortSettings());
-			settings = (QuickPortSettings)playerSettings.get(player.getName());
-		}
+    private QuickPortListener listener = new QuickPortListener();
+    private Hashtable playerSettings = new Hashtable();
+    private enum Mode { SELF, TUNNEL, SELECT, PLAYER };
 
-		return(settings);
-	}
-	
-    public void enable() {
-	
-		log.info("[QuickPort] Mod Enabled.");
-		etc.getInstance().addCommand("/quickport", "Using a compass (345) in hand, left-click to teleport");
-		
+    public void enable()
+    {
+    }
+
+    public void disable()
+    {
     }
     
-    
-    public void disable() {
-		etc.getInstance().removeCommand("/quickport");
-		log.info("[QuickPort] Mod Disabled.");
-		
+    public void initialize()
+    {
+        etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.MEDIUM);
+        etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
     }
-	
-	//Hooking on arm animation to fire torch
-	public void onArmSwing(Player player)
-	{
-		if ((player.canUseCommand("/QuickPort")) && (player.getItemInHand() == 345))
-		{
-			QuickPortSettings settings = getSettings(player);
-			
-			Location playerLoc;
-			if (settings.targetPlayer == null)
-				playerLoc = player.getLocation();
-			else
-				playerLoc = settings.targetPlayer.getLocation();
-			
-			HitBlox blox = new HitBlox(player, 300, 0.3);
-			while ((blox.getNextBlock() != null) && (blox.getCurBlock().getType() == 0));
-				if (blox.getCurBlock() != null)
-				{
-						for(int i = 0; i<100; i++)
-						{
-							int cur = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i, blox.getCurBlock().getZ()).getType();
-							int above = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i + 1, blox.getCurBlock().getZ()).getType();
-							if (cur == 0 && above == 0)
-							{
-								playerLoc.x = blox.getCurBlock().getX();
-								playerLoc.y = blox.getCurBlock().getY() + i;
-								playerLoc.z = blox.getCurBlock().getZ();
-								
-								if (settings.targetPlayer == null)
-									player.teleportTo(playerLoc);
-								else
+
+    //Returns a QuickPortSettings for the player, making a new one if it has to
+    public QuickPortSettings getSettings(Player player)
+    {
+        QuickPortSettings settings = (QuickPortSettings)playerSettings.get(player.getName());
+        if (settings == null)
+        {
+            playerSettings.put(player.getName(), new QuickPortSettings());
+            settings = (QuickPortSettings)playerSettings.get(player.getName());
+        }
+
+        return(settings);
+    }
+    
+    public class QuickPortSettings
+    {
+        public Mode mode = Mode.SELF;
+        public Player targetPlayer;
+        public boolean firstSelect;
+        
+        public boolean modeIs(Mode in_mode)
+        {
+            
+            return (mode == in_mode);
+        }
+        
+        public void setMode(Mode in_mode)
+        {
+            mode = in_mode;
+        }
+        
+        public void switchMode(Player player)
+        {
+            switch (mode)
+            {
+                case SELF:
+                    mode = Mode.TUNNEL;
+                    player.sendMessage("QuickPort Mode: " + Colors.LightGreen + "Tunnel");
+                    break;
+                case TUNNEL:
+                    if (player.canUseCommand("/QuickPortOther") && etc.getServer().getPlayerList().size() > 1)
+                    {
+                        mode = Mode.SELECT;
+                        firstSelect = true;
+                        player.sendMessage("QuickPort Mode: " + Colors.LightPurple + "Select Player");
+                    }
+                    else
+                    {
+                        mode = Mode.SELF;
+                        player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
+                    }
+                    break;
+                case SELECT:
+                    if (firstSelect || !player.canUseCommand("/QuickPortOther")) //neurotic
+                    {
+                        mode = Mode.SELF;
+                        player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
+                    }
+                    else
+                    {
+                        mode = Mode.PLAYER;
+                        player.sendMessage("QuickPort Mode: " + Colors.LightBlue + " Target (" + Colors.White + targetPlayer.getName() + Colors.LightBlue + ")");
+                    }
+                    break;
+                default:
+                    mode = Mode.SELF;
+                    player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
+                    break;
+            }
+        }
+        
+        public void selectPlayer(Player player)
+        {
+            if (firstSelect && targetPlayer != null && etc.getServer().getPlayerList().contains(targetPlayer))
+            {
+                firstSelect = false;
+                player.sendMessage("QuickPort Target: " + targetPlayer.getName());
+            }
+            else
+            {
+                List<Player> players = etc.getServer().getPlayerList();
+                int index = -1;
+                
+                if (targetPlayer != null)
+                    index = players.indexOf(targetPlayer);
+                    
+                //Loop around the top
+                if (index + 1 >= players.size())
+                    targetPlayer = players.get(0);
+                else
+                    targetPlayer = players.get(index + 1);
+
+                //Skip self
+                if (targetPlayer == player)
+                {
+                    index = players.indexOf(targetPlayer);
+                    if (index + 1 >= players.size())
+                        targetPlayer = players.get(0);
+                    else
+                        targetPlayer = players.get(index + 1);
+                }
+				player.sendMessage("QuickPort Target: " + targetPlayer.getName());
+            }
+        }
+        
+        
+    }
+    
+    public class QuickPortListener extends PluginListener
+    {
+
+        public void onArmSwing(Player player) {
+            if ((player.canUseCommand("/QuickPort") || player.canUseCommand("/QuickPortNormal")) && (player.getItemInHand() == 345))
+            {
+                QuickPortSettings settings = getSettings(player);
+
+                Location playerLoc;
+                if (settings.modeIs(Mode.PLAYER))
+					playerLoc = settings.targetPlayer.getLocation();
+                else
+                    playerLoc = player.getLocation();
+                
+                if (settings.modeIs(Mode.SELF) || settings.modeIs(Mode.PLAYER))
+                {
+                    HitBlox blox = new HitBlox(player, 300, 0.3);
+                    if (blox.getTargetBlock() != null)
+                    {
+                        for(int i = 0; i<100; i++)
+                        {
+                            int cur = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i, blox.getCurBlock().getZ()).getType();
+                            int above = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i + 1, blox.getCurBlock().getZ()).getType();
+                            if (cur == 0 && above == 0)
+                            {
+                                playerLoc.x = blox.getCurBlock().getX() + .5;
+                                playerLoc.y = blox.getCurBlock().getY() + i;
+                                playerLoc.z = blox.getCurBlock().getZ() + .5;
+                                
+                                if (settings.modeIs(Mode.PLAYER))
 									settings.targetPlayer.teleportTo(playerLoc);
-									
-								settings.targetPlayer = null;
-								i = 100;
-							}
-						}
-				}
+                                else
+                                    player.teleportTo(playerLoc);
+                                    
+                                settings.setMode(Mode.SELF);
+                                i = 100;
+                            }
+                        }
+                    }
+                }
+                else if (settings.modeIs(Mode.TUNNEL))
+                {
+                    HitBlox blox = new HitBlox(player, 300, 0.3);
+                    while ((blox.getNextBlock() != null) && ((blox.getCurBlock().getType() != 0) || ((blox.getLastBlock().getType() == 0))));
+                    if (blox.getCurBlock() != null)
+                    {
+                        for(int i = 0; i > -100; i--)
+                        {
+                            int below = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i - 1, blox.getCurBlock().getZ()).getType();
+                            int cur = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i, blox.getCurBlock().getZ()).getType();
+                            int above = etc.getServer().getBlockAt(blox.getCurBlock().getX(), blox.getCurBlock().getY() + i + 1, blox.getCurBlock().getZ()).getType();
+                            if (below != 0 && cur == 0 && above == 0)
+                            {
+                                playerLoc.x = blox.getCurBlock().getX() + .5;
+                                playerLoc.y = blox.getCurBlock().getY() + i;
+                                playerLoc.z = blox.getCurBlock().getZ() + .5;
 
-		}
-	}
-	
+                                player.teleportTo(playerLoc);
 
-	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand)
-	{
-		if ((player.canUseCommand("/QuickPort")) && (itemInHand == 345))
-		{
-			QuickPortSettings settings = getSettings(player);
-			List<Player> players = etc.getServer().getPlayerList();
-			int index = -1;
-			
-			if (settings.targetPlayer == null)
-				index = -1;
-			else
-				index = players.indexOf(settings.targetPlayer);
-				
-			if ((index + 1 >= players.size()) || (players.get(index + 1) == player && index + 2 >= players.size()))
-				settings.targetPlayer = null;
-			else if (players.get(index + 1) == player && index + 2 < players.size())
-				settings.targetPlayer = players.get(index + 2);
-			else
-				settings.targetPlayer = players.get(index + 1);
+                                settings.targetPlayer = null;
+                                i = -100;
+                            }
+                        }
+                    }
+                }
+                else if (settings.modeIs(Mode.SELECT))
+                {
+                    settings.selectPlayer(player);
+                }
+            }
+        }
+        
+        //Toggles through players on server as targets and tunnel mode
+        public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand)
+        {
+            if ((player.canUseCommand("/QuickPort")) && (itemInHand == 345))
+            {
+                QuickPortSettings settings = getSettings(player);
+                settings.switchMode(player);    
+            }
+            return(false);
+        }
 
-			if (settings.targetPlayer == null)
-				player.sendMessage("QuickPort Target: [Self]");
-			else
-				player.sendMessage("QuickPort Target: " + settings.targetPlayer.getName());
-					
-					
-		}
-		return(false);
-	}
+    }
 
-	//This class allows us to step through each block along the
-	// line of sight of the player.
-	class HitBlox
-	{
-		private Location player_loc;
-		private double rot_x, rot_y, view_height;
-		
-		private double length, h_length, step;
-		private int range;
-		
-		private double x_offset, y_offset, z_offset;
-		private int    last_x,   last_y,   last_z;
-		private int    target_x, target_y, target_z, target_type;
-
-		
-		
-		public HitBlox(Player player, int in_range, double in_step)
-		{
-			player_loc = player.getLocation();
-			range = in_range;
-			step = in_step;
-			length = 0;
-			rot_x = (player_loc.rotX+90) % 360;
-			rot_y = player_loc.rotY * -1;
-			
-		/*	if (player.isCrouching()) //Hopefully we can find this!
-				view_height = 1.45;
-			else */
-				view_height = 1.65;
-			
-			target_x = (int) (player_loc.x);
-			target_y = (int) (player_loc.y + view_height);
-			target_z = (int) (player_loc.z);
-			last_x = target_x;
-		    last_y = target_y;
-		    last_z = target_z;
-		}
-		
-		public Block getNextBlock()
-		{
-			last_x = target_x;
-		    last_y = target_y;
-		    last_z = target_z;
-			
-			do
-			{
-				length += step;
-				
-				h_length = (length * Math.cos(Math.toRadians(rot_y)));
-				y_offset = (length * Math.sin(Math.toRadians(rot_y)));
-				x_offset = (h_length * Math.cos(Math.toRadians(rot_x)));
-				z_offset = (h_length * Math.sin(Math.toRadians(rot_x)));
-				
-				target_x = (int) (x_offset + player_loc.x);
-				target_y = (int) (y_offset + player_loc.y + view_height);
-				target_z = (int) (z_offset + player_loc.z);
-				
-				
-			} while ((length <= range) && ((target_x == last_x) && (target_y == last_y) && (target_z == last_z)));
-			
-			if(length > range)
-				return null;
-			
-			return etc.getServer().getBlockAt(target_x, target_y, target_z);
-		}
-		
-		public Block getCurBlock()
-		{
-			if(length > range)
-				return null;
-			else
-				return etc.getServer().getBlockAt(target_x, target_y, target_z);
-		}
-		
-		public void setCurBlock(int type)
-		{
-			if(length <= range)
-				etc.getServer().setBlockAt(type, target_x, target_y, target_z);
-		}
-		
-		public Block getLastBlock()
-		{
-			return etc.getServer().getBlockAt(last_x, last_y, last_z);
-		}
-		
-		public void setLastBlock(int type)
-		{
-			etc.getServer().setBlockAt(type, last_x, last_y, last_z);
-		}
-	}
 }
