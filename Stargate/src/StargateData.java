@@ -101,6 +101,7 @@ public class StargateData {
 				player.sendMessage("Incorrect");
 				return;
 			}
+			StargateList.add(split[1]);
 			for(int i=0;i<3;i++) {
 				if(pointsCoordinates.get(playerindex+i) > pointsCoordinates.get(playerindex+i+3)) {
 					StargateLocations.add(pointsCoordinates.get(playerindex+i+3));
@@ -120,6 +121,23 @@ public class StargateData {
 				}
 			}
 			StargateLocations.add(facingout-facingin);
+			
+						try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter("Stargatedata.txt", true));
+				String throwawaystring = split[0];
+				int stargateindex = StargateList.indexOf(split[1]);
+				player.sendMessage("stargate length : " + StargateLocations.size());
+				for(int i=0; i<13;i++) {
+					throwawaystring = throwawaystring + ',' + StargateLocations.get(stargateindex+i);
+				}
+				writer.append(throwawaystring);
+				writer.newLine();
+				writer.close();
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "[Stargate] : Error while writing Stargatedata.txt", e);
+				return;
+			}
+			
 			player.sendMessage("Stargate saved");
 		} else {
 			player.sendMessage("Incorrect");
@@ -157,7 +175,7 @@ public class StargateData {
 				if(player.getX()>=StargateLocations.get(i*13) && player.getX()<StargateLocations.get(i*13+1) &&
 				player.getY()>=StargateLocations.get(i*13+2) && player.getY()<StargateLocations.get(i*13+3) &&
 				player.getZ()>=StargateLocations.get(i*13+4) && player.getZ()<StargateLocations.get(i*13+5) ) {
-					player.sendMessage("woosh");
+					player.sendMessage("Woosh!");
 					
 					player.teleportTo(fromto((double)StargateLocations.get(i*13), 
 											(double)StargateLocations.get(i*13+1), 
@@ -186,8 +204,57 @@ public class StargateData {
 	}
 	
 	public static double fromto(double minfrom, double maxfrom, double minto, double maxto, double playerloc) {
-	
 	return (minto + ((maxto-minto) * (playerloc - minfrom) / (maxfrom - minfrom)));	
+	}
+	
+	
+	public static void loadStargateData(){
+		File dataSource = new File("Stargatedata.txt");
+		if (!dataSource.exists()){
+			FileWriter writer = null;
+            try {
+                writer = new FileWriter("Stargatedata.txt", true);
+                writer.append("#Data for the Stargate plugin is located in this file\r\n");
+                writer.close();
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "[Stargate] : Exception while creating Stargatedata.txt");
+            } finally {
+            	try{
+            		writer.close();
+            	}
+            	catch(IOException e){
+            		 log.log(Level.SEVERE, "[Stargate] : Exception while closing StargateData writer", e);
+            	}
+            }
+		} else {
+			try {
+				StargateList = new ArrayList<String>();
+				StargateLocations = new ArrayList<Integer>();
+				
+				Scanner scanner = new Scanner(dataSource);
+				while (scanner.hasNextLine()) {
+					String line = scanner.nextLine();
+					if (line.startsWith("#") || line.equals("")) {
+						continue;
+					}
+					String[] split = line.split(",");
+					
+					if (split.length != 14) {
+						continue;
+					}
+			        StargateList.add(split[0]);
+			        for(int i=1;i<14;i++) {
+			        	StargateLocations.add(Integer.parseInt(split[i]));
+			        }
+				}
+				scanner.close();
+				log.info("Stargate plugin : successfuly loaded.");
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "Stargate plugin : Error while reading Stargatedata.txt", e);
+			}
+			
+		}
+		return;
 	}
 }
 

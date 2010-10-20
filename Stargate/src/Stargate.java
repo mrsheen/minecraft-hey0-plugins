@@ -13,6 +13,7 @@ public class Stargate extends Plugin {
 	
     public void enable() {
 		log.info("[Stargate] Mod Enabled.");
+		StargateData.loadStargateData();
     }
 
     public void disable() {
