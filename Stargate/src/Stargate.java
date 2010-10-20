@@ -30,7 +30,7 @@ public class Stargate extends Plugin {
     {
 
 	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand){
-		if ( (itemInHand==285) && player.canUseCommand("/saveStargate")){
+		if ( (itemInHand==283) && player.canUseCommand("/saveStargate")){
 					Integer whichPoint = StargateData.setPoint(player.getName(), blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 					if(whichPoint == 2) {
 						player.sendMessage("First corner of teleport area set");
@@ -53,7 +53,7 @@ public class Stargate extends Plugin {
             return false;
         }
         if (split[0].equalsIgnoreCase("/saveStargate")) {
-        	if (split.length == 3) {
+        	if (split.length == 4) {
 	        	StargateData.Savestargate(player,split);
         	}
 			return true;

@@ -20,6 +20,7 @@ public class StargateData {
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Integer> selectionStatus = new ArrayList<Integer>();
 	static ArrayList<Integer> pointsCoordinates = new ArrayList<Integer>();
+	static ArrayList<Integer> landing = new ArrayList<Integer>();
 		
 	private static int getPlayerIndex(String playerName){
 		
@@ -32,6 +33,7 @@ public class StargateData {
 		if (!inList){
 			playerList.add(playerName);
 			selectionStatus.add(1);
+			landing.add(-1);
 			pointsCoordinates.add(null);	
 			pointsCoordinates.add(null);
 			pointsCoordinates.add(null);
@@ -93,6 +95,12 @@ public class StargateData {
 	public static void Savestargate(Player player, String[] split) {
 		int playerindex = getPlayerIndex(player.getName())*12;
 		if(pointsCoordinates.get(playerindex+11) != null) {
+			int facingin =enumdirections(split[2]);
+			int facingout = enumdirections(split[3]);
+			if( (facingin == -1) || (facingout == -1) ) {
+				player.sendMessage("Incorrect");
+				return;
+			}
 			for(int i=0;i<3;i++) {
 				if(pointsCoordinates.get(playerindex+i) > pointsCoordinates.get(playerindex+i+3)) {
 					StargateLocations.add(pointsCoordinates.get(playerindex+i+3));
@@ -111,6 +119,7 @@ public class StargateData {
 					StargateLocations.add(pointsCoordinates.get(playerindex+i+3)+1);
 				}
 			}
+			StargateLocations.add(facingout-facingin);
 			player.sendMessage("Stargate saved");
 		} else {
 			player.sendMessage("Incorrect");
@@ -118,32 +127,60 @@ public class StargateData {
 		return;
 	}
 	
+	public static int enumdirections(String dir) {
+		switch (dir.toLowerCase().charAt(0)) {
+			case 'n': return 0;
+			case 'e': return 1;
+			case 's': return 2;
+			case 'w': return 3;
+			
+			default: return -1;
+		}
+	}
+	
 	public static void Checkplayerpos(Location to,Player player) {
 		if(StargateLocations.size()>0) {
-			for(int i=0;i<StargateLocations.size()/12;i++) {
-				if(player.getX()>=StargateLocations.get(i*12) && player.getX()<StargateLocations.get(i*12+1) &&
-				player.getY()>=StargateLocations.get(i*12+2) && player.getY()<StargateLocations.get(i*12+3) &&
-				player.getZ()>=StargateLocations.get(i*12+4) && player.getZ()<StargateLocations.get(i*12+5) ) {
+			int playerIndex = getPlayerIndex(player.getName());
+			
+			if(landing.get(playerIndex) >= 0) {
+				int i = landing.get(playerIndex);
+				if(player.getX()>=StargateLocations.get(i*13+6) && player.getX()<StargateLocations.get(i*13+7) &&
+				player.getY()>=StargateLocations.get(i*13+8) && player.getY()<StargateLocations.get(i*13+9) &&
+				player.getZ()>=StargateLocations.get(i*13+10) && player.getZ()<StargateLocations.get(i*13+11) ) {
+					return;
+				} else {
+					landing.set(playerIndex,-1);
+					return;
+				}
+			} else {
+				for(int i=0;i<StargateLocations.size()/13;i++) {
+				if(player.getX()>=StargateLocations.get(i*13) && player.getX()<StargateLocations.get(i*13+1) &&
+				player.getY()>=StargateLocations.get(i*13+2) && player.getY()<StargateLocations.get(i*13+3) &&
+				player.getZ()>=StargateLocations.get(i*13+4) && player.getZ()<StargateLocations.get(i*13+5) ) {
 					player.sendMessage("woosh");
 					
-					player.teleportTo(fromto((double)StargateLocations.get(i*12), 
-											(double)StargateLocations.get(i*12+1), 
-											(double)StargateLocations.get(i*12+6), 
-											(double)StargateLocations.get(i*12+7), 
+					player.teleportTo(fromto((double)StargateLocations.get(i*13), 
+											(double)StargateLocations.get(i*13+1), 
+											(double)StargateLocations.get(i*13+6), 
+											(double)StargateLocations.get(i*13+7), 
 											player.getX()),
-					fromto((double)StargateLocations.get(i*12+2), 
-											(double)StargateLocations.get(i*12+3), 
-											(double)StargateLocations.get(i*12+8), 
-											(double)StargateLocations.get(i*12+9), 
+					fromto((double)StargateLocations.get(i*13+2), 
+											(double)StargateLocations.get(i*13+3), 
+											(double)StargateLocations.get(i*13+8), 
+											(double)StargateLocations.get(i*13+9), 
 											player.getY()),
-					fromto((double)StargateLocations.get(i*12+4), 
-											(double)StargateLocations.get(i*12+5), 
-											(double)StargateLocations.get(i*12+10), 
-											(double)StargateLocations.get(i*12+11), 
+					fromto((double)StargateLocations.get(i*13+4), 
+											(double)StargateLocations.get(i*13+5), 
+											(double)StargateLocations.get(i*13+10), 
+											(double)StargateLocations.get(i*13+11), 
 											player.getZ()),
-					player.getRotation(),
+					player.getRotation() + (float)StargateLocations.get(i*13+12) * 90,
 					player.getPitch());
+					landing.set(playerIndex,i);
+					return;
+					}
 				}
+				
 			}
 		}
 	}
