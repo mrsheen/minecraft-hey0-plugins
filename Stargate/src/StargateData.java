@@ -124,7 +124,7 @@ public class StargateData {
 			
 						try {
 				BufferedWriter writer = new BufferedWriter(new FileWriter("Stargatedata.txt", true));
-				String throwawaystring = split[0];
+				String throwawaystring = split[1];
 				int stargateindex = StargateList.indexOf(split[1]);
 				player.sendMessage("stargate length : " + StargateLocations.size());
 				for(int i=0; i<13;i++) {
