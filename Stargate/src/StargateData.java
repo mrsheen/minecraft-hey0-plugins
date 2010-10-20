@@ -172,7 +172,6 @@ public class StargateData {
 				}
 			} else {
 				for(int i=0;i<StargateLocations.size()/13;i++) {
-				player.sendMessage("Checked a gate");
 				if(player.getX()>=StargateLocations.get(i*13) && player.getX()<StargateLocations.get(i*13+1) &&
 				player.getY()>=StargateLocations.get(i*13+2) && player.getY()<StargateLocations.get(i*13+3) &&
 				player.getZ()>=StargateLocations.get(i*13+4) && player.getZ()<StargateLocations.get(i*13+5) ) {
@@ -241,15 +240,12 @@ public class StargateData {
 					String[] split = line.split(",");
 					
 					if (split.length != 14) {
-						log.info("Returned at != 14");
 						continue;
 					}
 			        StargateList.add(split[0]);
-						log.info("stargate name added");
 			        for(int i=1;i<14;i++) {
 			        	StargateLocations.add(Integer.parseInt(split[i]));
 			        }
-						log.info("stargate data added");
 				}
 				scanner.close();
 				log.info("Stargate plugin : successfuly loaded.");
