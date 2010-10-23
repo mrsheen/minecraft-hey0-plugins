@@ -19,9 +19,16 @@ public class BorderLands extends SuperPlugin
   public void reloadExtra() {
     this.distanceToBorder = this.config.getInt("distanceToBorder", 500);
     this.useRadiusOnly = this.config.getBoolean("useRadiusOnly", false);
-    this.unfortunateQuote = this.config.getString("unfortunateQuote", "Somehow you were out of bounds, and thus returned to spawn.");
+	this.unfortunateQuote = this.config.getString("unfortunateQuote", "Somehow you were out of bounds, and thus returned to spawn.");
     this.teleportQuote = this.config.getString("teleportQuote", "You cannot teleport outside the map borders.");
     this.borderQuote = this.config.getString("borderQuote", "You have reached the border.");
+	
+	try {
+		this.distanceToBorder =  etc.getInstance().getLimit() - 16; // 1 chunk from map soft limit
+	}
+	catch (Exception e) {
+		// do nothing
+	}
   }
 
   private double getDistanceFromSpawn(Location a) {
@@ -39,7 +46,7 @@ public class BorderLands extends SuperPlugin
 
     public void onPlayerMove(Player player, Location from, Location to)
     {
-      if (BorderLands.this.getDistanceFromSpawn(to) >= BorderLands.this.distanceToBorder)
+	  if (BorderLands.this.getDistanceFromSpawn(to) >= BorderLands.this.distanceToBorder)
         if (BorderLands.this.getDistanceFromSpawn(from) >= BorderLands.this.distanceToBorder) {
           Location spawn = etc.getServer().getSpawnLocation();
           player.sendMessage("§4" + BorderLands.this.unfortunateQuote);
