@@ -69,7 +69,10 @@ public class MagicCarpet extends Plugin
 			{
 				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z).getType() == 0) {
 					fibers[i].imadeit = true;
-					etc.getServer().setBlockAt(fibers[i].type, (int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z);
+					int blocktypeunder = etc.getServer().getBlockIdAt((int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z);
+					if (blocktypeunder!=67 && blocktypeunder!=53) {
+						etc.getServer().setBlockAt(fibers[i].type, (int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z);
+					}
 				} else {
 					fibers[i].imadeit = false;
 				}
