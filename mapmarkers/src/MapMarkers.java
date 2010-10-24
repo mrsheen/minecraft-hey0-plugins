@@ -19,7 +19,7 @@ import org.json.simple.parser.*;
 public class MapMarkers extends Plugin {
 
 	public String markersFile;
-    public Properties properties;
+    public PropertiesFile propertiesFile;
 	public SimpleDateFormat dateFormat ;
 	public Date date;
 	public Date oldDate;
@@ -38,7 +38,7 @@ public class MapMarkers extends Plugin {
 	private final Semaphore available = new Semaphore(1, true);
     
     public MapMarkers() {
-		properties = new Properties();
+		propertiesFile = new PropertiesFile("mapmarkers.properties");
 		dateFormat = new SimpleDateFormat("yyMMdd-HH.mm.ss");
 	}
 	
@@ -49,21 +49,14 @@ public class MapMarkers extends Plugin {
     }
 	
 	public boolean load() {
-        try {
-            File f = new File("mapmarkers.properties");
-            if (f.exists())
-			{
-                properties.load(new FileInputStream("mapmarkers.properties"));
-				}
-            else
-			{
-                f.createNewFile();
-				}
+        try {			
+			propertiesFile.load();
+			
         } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers properties file.", e);
+            log.log(Level.SEVERE, "[MapMarkers] : Exception while loading mapmarkers properties file.", e);
         }
         
-        markersFile = properties.getProperty("markers", "world/markers.json");
+        markersFile = propertiesFile.getString("markers", "world/markers.json");
         
         String[] filesToCheck = { markersFile };
         for (String f : filesToCheck) {
@@ -71,13 +64,16 @@ public class MapMarkers extends Plugin {
                 File fileCreator = new File(f);
                 if (!fileCreator.exists())
                     fileCreator.createNewFile();
+					BufferedWriter fout = new BufferedWriter(new FileWriter(f));
+					fout.write(markersArray.toString());
+					fout.close();
             } catch (IOException e) {
                 log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers file.", e);
             }
         }
         
         try {
-            properties.store(new FileOutputStream("mapmarkers.properties"), null);
+            propertiesFile.save();
         } catch (Exception e) {
                 log.log(Level.SEVERE, "[MapMarkers] : Exception while saving mapmarkers properties file.", e);
         }
