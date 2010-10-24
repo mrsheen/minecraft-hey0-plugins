@@ -18,6 +18,7 @@ import org.json.simple.parser.*;
 
 public class MapMarkers extends Plugin {
 
+	public int staleTimeout;
 	public String markersFile;
     public PropertiesFile propertiesFile;
 	public SimpleDateFormat dateFormat ;
@@ -56,6 +57,7 @@ public class MapMarkers extends Plugin {
             log.log(Level.SEVERE, "[MapMarkers] : Exception while loading mapmarkers properties file.", e);
         }
         
+		staleTimeout = propertiesFile.getInt("stale-timeout", 300);
         markersFile = propertiesFile.getString("markers", "world/markers.json");
         
         String[] filesToCheck = { markersFile };
@@ -135,28 +137,37 @@ public class MapMarkers extends Plugin {
 			
 			// Work out 5 minutes ago
 
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.MINUTE, -5);
-			date = cal.getTime();
-			
-			// Remove stale markers
-			try {
-				for(Object obj : markersArray)
-				{
-					try {
-						JSONObject marker = (JSONObject)obj;
-						oldDate = dateFormat.parse ((String)marker.get("timestamp"));
-						if (oldDate.before(date)) {
-							removeMarker((String)marker.get("msg"));
+			if (staleTimeout > 0) {
+				// Remove stale markers
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.SECOND, staleTimeout);
+				//cal.add(Calendar.MINUTE, -5);
+				date = cal.getTime();
+				int markerId = 4;
+				
+				try {
+					for(Object obj : markersArray)
+					{
+						try {
+							JSONObject marker = (JSONObject)obj;
+							markerId = Integer.parseInt((String)marker.get("id"));
+							if (markerId == 4)
+							{
+								// Only remove player positions
+								oldDate = dateFormat.parse ((String)marker.get("timestamp"));
+								if (oldDate.before(date)) {
+									removeMarker((String)marker.get("msg"));
+								}
+							}
 						}
-					}
-					catch(Exception e) {
-						//ee.printStackTrace();
-					}
-				}	
-			}
-			catch (Exception e) {
-			
+						catch(Exception e) {
+							//ee.printStackTrace();
+						}
+					}	
+				}
+				catch (Exception e) {
+				
+				}
 			}
 			
 			BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
