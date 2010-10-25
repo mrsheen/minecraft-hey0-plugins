@@ -19,8 +19,9 @@ import org.json.simple.parser.*;
 public class MapMarkers extends Plugin {
 
 	public int staleTimeout;
+        public int updateMarkerFile;
 	public String markersFile;
-    public PropertiesFile propertiesFile;
+        public PropertiesFile propertiesFile;
 	public SimpleDateFormat dateFormat ;
 	public Date date;
 	public Date oldDate;
@@ -57,7 +58,8 @@ public class MapMarkers extends Plugin {
             log.log(Level.SEVERE, "[MapMarkers] : Exception while loading mapmarkers properties file.", e);
         }
         
-		staleTimeout = propertiesFile.getInt("stale-timeout", 300);
+        staleTimeout = propertiesFile.getInt("stale-timeout", 0);
+        updateMarkerFile = propertiesFile.getInt("update-markerfile-seconds", 0);
         markersFile = propertiesFile.getString("markers", "world/markers.json");
         
         String[] filesToCheck = { markersFile };
@@ -338,7 +340,7 @@ public class MapMarkers extends Plugin {
                                 available.release();
                             }
                         }
-                        , 3*1000);
+                        , updateMarkerFile*1000);
 
                 }	
             }
