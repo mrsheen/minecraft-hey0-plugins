@@ -88,6 +88,8 @@ public class MapMarkers extends Plugin {
 		Location spawn = etc.getInstance().getServer().getSpawnLocation();
 		setMarker("Spawn",spawn.x, spawn.x, spawn.z, 0);
 		
+		writeMarkers();
+		
         return true;
 		
 		
