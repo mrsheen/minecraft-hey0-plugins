@@ -20,7 +20,7 @@ public class MapMarkers extends Plugin {
 
 	public int staleTimeout;
 	public String markersFile;
-    public PropertiesFile propertiesFile;
+	public PropertiesFile propertiesFile;
 	public SimpleDateFormat dateFormat ;
 	public Date date;
 	public Date oldDate;
@@ -31,57 +31,57 @@ public class MapMarkers extends Plugin {
 	static JSONArray markersArray = new JSONArray();
 	
 	
-    private MapMarkersListener listener = new MapMarkersListener();
+	private MapMarkersListener listener = new MapMarkersListener();
 
-    protected static final Logger log = Logger.getLogger("Minecraft");
-    private final String newLine = System.getProperty("line.separator");
+	protected static final Logger log = Logger.getLogger("Minecraft");
+	private final String newLine = System.getProperty("line.separator");
 	
 	private final Semaphore available = new Semaphore(1, true);
-    
-    public MapMarkers() {
+	
+	public MapMarkers() {
 		propertiesFile = new PropertiesFile("mapmarkers.properties");
 		dateFormat = new SimpleDateFormat("yyMMdd-HH.mm.ss");
 	}
 	
-	    public void initialize()
-    {
-        etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
-        etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
-    }
+		public void initialize()
+	{
+		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
+	}
 	
 	public boolean load() {
-        try {			
+		try {			
 			propertiesFile.load();
 			
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while loading mapmarkers properties file.", e);
-        }
-        
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "[MapMarkers] : Exception while loading mapmarkers properties file.", e);
+		}
+		
 		staleTimeout = propertiesFile.getInt("stale-timeout", 300);
-        markersFile = propertiesFile.getString("markers", "world/markers.json");
-        
-        String[] filesToCheck = { markersFile };
-        for (String f : filesToCheck) {
-            try {
-                File fileCreator = new File(f);
-                if (!fileCreator.exists())
-                    fileCreator.createNewFile();
+		markersFile = propertiesFile.getString("markers", "world/markers.json");
+		
+		String[] filesToCheck = { markersFile };
+		for (String f : filesToCheck) {
+			try {
+				File fileCreator = new File(f);
+				if (!fileCreator.exists())
+					fileCreator.createNewFile();
 					BufferedWriter fout = new BufferedWriter(new FileWriter(f));
 					fout.write(markersArray.toString());
 					fout.close();
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers file.", e);
-            }
-        }
-        
-        try {
-            propertiesFile.save();
-        } catch (Exception e) {
-                log.log(Level.SEVERE, "[MapMarkers] : Exception while saving mapmarkers properties file.", e);
-        }
+			} catch (IOException e) {
+				log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers file.", e);
+			}
+		}
+		
+		try {
+			propertiesFile.save();
+		} catch (Exception e) {
+				log.log(Level.SEVERE, "[MapMarkers] : Exception while saving mapmarkers properties file.", e);
+		}
 		
 		
-        
+		
 		loadMarkers();
 		
 		//!TODO!Replace id with ENUM
@@ -90,37 +90,37 @@ public class MapMarkers extends Plugin {
 		
 		writeMarkers();
 		
-        return true;
+		return true;
 		
 		
-    }
-    
-    public void enable() {
-        if (load())
+	}
+	
+	public void enable() {
+		if (load())
 		{
-            log.info("[MapMarkers] Mod Enabled.");
+			log.info("[MapMarkers] Mod Enabled.");
 			etc.getInstance().addCommand("/newlabel", "[label] - Adds new label at the current position");
 			etc.getInstance().addCommand("/dellabel", "[label] - Deletes label");
 		}	
-        else
+		else
 		{
-            log.info("[MapMarkers] Error while loading.");
+			log.info("[MapMarkers] Error while loading.");
 			}
-    }
-    
-    
-    public void disable() {
+	}
+	
+	
+	public void disable() {
 		etc.getInstance().removeCommand("/newlabel");
 		etc.getInstance().removeCommand("/dellabel");
-        log.info("[MapMarkers] Mod Disabled.");
+		log.info("[MapMarkers] Mod Disabled.");
 		
-    }
+	}
 
-    public String onLoginChecks(String user) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public String onLoginChecks(String user) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
-    public void onLogin(Player player) {
+	public void onLogin(Player player) {
 		try {
 			setMarker(player.getName(),player.getX(), player.getY(), player.getZ(), 4);
 			// Update file
@@ -130,14 +130,14 @@ public class MapMarkers extends Plugin {
 			
 		}
 		
-    }
-    
-    public synchronized boolean writeMarkers() {
-        try {
+	}
+	
+	public synchronized boolean writeMarkers() {
+		try {
 		
 			/* BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
-            fout.write(markersArray.toString());
-            fout.close();
+			fout.write(markersArray.toString());
+			fout.close();
 			
 			return true; */
 			
@@ -177,17 +177,17 @@ public class MapMarkers extends Plugin {
 			}
 			
 			BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
-            fout.write(markersArray.toString());
-            fout.close();
-            
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while updating label", e);
+			fout.write(markersArray.toString());
+			fout.close();
+			
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "[MapMarkers] : Exception while updating label", e);
 		
-            return false;
-        }
+			return false;
+		}
 		
-        return true;
-    }
+		return true;
+	}
 	
 	
 	private static int getMarkerIndex(String label){
@@ -235,9 +235,9 @@ public class MapMarkers extends Plugin {
 		//!TODO!Load existing markers.json into array
 		JSONArray tempmarkersArray = new JSONArray();
 		try {
-            File inFile = new File(markersFile);
-            BufferedReader fin = new BufferedReader(new FileReader(inFile));
-            
+			File inFile = new File(markersFile);
+			BufferedReader fin = new BufferedReader(new FileReader(inFile));
+			
 			JSONParser parser = new JSONParser();
 			
 
@@ -266,65 +266,65 @@ public class MapMarkers extends Plugin {
 				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
 			}
 			
-            fin.close();
+			fin.close();
 			
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "[MapMarkers] : Exception while reading markers", e);
-        }
-        
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "[MapMarkers] : Exception while reading markers", e);
+		}
+		
 	}
 	
-	    public class MapMarkersListener extends PluginListener
-    {
+		public class MapMarkersListener extends PluginListener
+	{
 
-    public boolean onCommand(Player player, String[] split) {
-        if (!player.canUseCommand(split[0]))
-            return false;
-        
+	public boolean onCommand(Player player, String[] split) {
+		if (!player.canUseCommand(split[0]))
+			return false;
+		
 		if (split[0].equalsIgnoreCase("/newlabel")) {
 		//!TODO!add error checking to look for existing labels
-            if (split.length < 2) {
-                player.sendMessage(Colors.Rose + "Correct usage is: /newlabel [name] ");
-                return true;
-            }
-            
-            int labelId = 3;
-            String label = split[1];
-            if (split.length >= 2) {
-                for (int i = 2; i < split.length; i++)
-                    label += split[i];
-            }
-            
+			if (split.length < 2) {
+				player.sendMessage(Colors.Rose + "Correct usage is: /newlabel [name] ");
+				return true;
+			}
+			
+			int labelId = 3;
+			String label = split[1];
+			if (split.length >= 2) {
+				for (int i = 2; i < split.length; i++)
+					label += split[i];
+			}
+			
 			setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
-			log.info("[MapMarkers] "+player.getName()+" created a new label called "+split[1]+".");
-            player.sendMessage(Colors.Green + "Label Created!");
-            
-        }
+			log.info("[MapMarkers] "+player.getName()+" created a new label called "+label+".");
+			player.sendMessage(Colors.Green + "Label Created!");
+			
+		}
 		else if (split[0].equalsIgnoreCase("/dellabel")) {
 		//!TODO!add error checking to delete only existing labels
-            if (split.length < 2) {
-                player.sendMessage(Colors.Rose + "Correct usage is: /dellabel [name] ");
-                return true;
-            }
-            String label = split[1];
-            if (split.length >= 2) {
-                for (int i = 2; i < split.length; i++)
-                    label += split[i];
-            }
-            
+			if (split.length < 2) {
+				player.sendMessage(Colors.Rose + "Correct usage is: /dellabel [name] ");
+				return true;
+			}
+			String label = split[1];
+			if (split.length >= 2) {
+				for (int i = 2; i < split.length; i++)
+					label += split[i];
+			}
+			
 			removeMarker(label);
 		
-			log.info("[MapMarkers] "+player.getName()+" deleted a label called "+split[1]+".");
+			log.info("[MapMarkers] "+player.getName()+" deleted a label called "+label+".");
 			player.sendMessage(Colors.Green + "Label Deleted!");
 		
 	  
-        }
+		}
 		//!TODO!add listlabels
 		
-        else
-            return false;
-        return true;
-    }
+		else
+			return false;
+		return true;
+	}
 	
 	public void onPlayerMove(Player player, Location from, Location to) {
 		try {
@@ -349,7 +349,7 @@ public class MapMarkers extends Plugin {
 		}
 		
 	}
-    	
-    }
+		
+	}
 	
 }
