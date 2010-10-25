@@ -84,6 +84,10 @@ public class MapMarkers extends Plugin {
         
 		loadMarkers();
 		
+		//!TODO!Replace id with ENUM
+		Location spawn = etc.getInstance().getServer().getSpawnLocation();
+		setMarker("Spawn",spawn.x, spawn.x, spawn.z, 0);
+		
         return true;
 		
 		
