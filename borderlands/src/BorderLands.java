@@ -24,18 +24,19 @@ public class BorderLands extends SuperPlugin
     this.borderQuote = this.config.getString("borderQuote", "You have reached the border.");
 	
 	try {
-		this.distanceToBorder =  etc.getInstance().getLimit() - 16; // 1 chunk from map soft limit
+		this.distanceToBorder =  etc.getInstance().getLimits()[2] - 16; // 1 chunk from map soft limit
 	}
 	catch (Exception e) {
 		// do nothing
 	}
   }
 
-  private double getDistanceFromSpawn(Location a) {
-    Location spawn = etc.getServer().getSpawnLocation();
+  private double getDistanceFromOrigin(Location a) {
+	int[] mapLimits = new int[] {0,0,0};
+	mapLimits = etc.getInstance().getLimits();
     if (!this.useRadiusOnly)
-      return Math.max(Math.abs(a.x - spawn.x), Math.abs(a.z - spawn.z));
-    return Math.sqrt(Math.pow(a.x - spawn.x, 2.0D) + Math.pow(a.z - spawn.z, 2.0D));
+      return Math.max(Math.abs(a.x - mapLimits[0]), Math.abs(a.z - mapLimits[1]));
+    return Math.sqrt(Math.pow(a.x - mapLimits[0], 2.0D) + Math.pow(a.z - mapLimits[1], 2.0D));
   }
 
   private class BorderListener extends PluginListener
@@ -46,8 +47,8 @@ public class BorderLands extends SuperPlugin
 
     public void onPlayerMove(Player player, Location from, Location to)
     {
-	  if (BorderLands.this.getDistanceFromSpawn(to) >= BorderLands.this.distanceToBorder)
-        if (BorderLands.this.getDistanceFromSpawn(from) >= BorderLands.this.distanceToBorder) {
+	  if (BorderLands.this.getDistanceFromOrigin(to) >= BorderLands.this.distanceToBorder)
+        if (BorderLands.this.getDistanceFromOrigin(from) >= BorderLands.this.distanceToBorder) {
           Location spawn = etc.getServer().getSpawnLocation();
           player.sendMessage("§4" + BorderLands.this.unfortunateQuote);
           player.teleportTo(spawn);
@@ -59,8 +60,8 @@ public class BorderLands extends SuperPlugin
 
     public boolean onTeleport(Player player, Location from, Location to)
     {
-      if (BorderLands.this.getDistanceFromSpawn(to) >= BorderLands.this.distanceToBorder) {
-        if (BorderLands.this.getDistanceFromSpawn(from) >= BorderLands.this.distanceToBorder) {
+      if (BorderLands.this.getDistanceFromOrigin(to) >= BorderLands.this.distanceToBorder) {
+        if (BorderLands.this.getDistanceFromOrigin(from) >= BorderLands.this.distanceToBorder) {
           Location spawn = etc.getServer().getSpawnLocation();
           player.sendMessage("§4" + BorderLands.this.unfortunateQuote);
           player.teleportTo(spawn);
