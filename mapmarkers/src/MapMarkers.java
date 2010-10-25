@@ -290,7 +290,7 @@ public class MapMarkers extends Plugin {
                 String label = split[1];
                 if (split.length >= 2) {
                     for (int i = 2; i < split.length; i++)
-                        label += split[i];
+                        label += " " + split[i];
                 }
                 
                 setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
@@ -307,7 +307,7 @@ public class MapMarkers extends Plugin {
                 String label = split[1];
                 if (split.length >= 2) {
                     for (int i = 2; i < split.length; i++)
-                        label += split[i];
+                        label += " " + split[i];
                 }
                 
                 removeMarker(label);
