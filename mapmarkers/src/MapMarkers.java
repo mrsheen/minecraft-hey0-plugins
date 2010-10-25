@@ -274,81 +274,79 @@ public class MapMarkers extends Plugin {
         
 	}
 	
-	    public class MapMarkersListener extends PluginListener
-    {
-
-    public boolean onCommand(Player player, String[] split) {
-        if (!player.canUseCommand(split[0]))
-            return false;
+	public class MapMarkersListener extends PluginListener {
+        public boolean onCommand(Player player, String[] split) {
+            if (!player.canUseCommand(split[0]))
+                return false;
+            
+            if (split[0].equalsIgnoreCase("/newlabel")) {
+            //!TODO!add error checking to look for existing labels
+                if (split.length < 2) {
+                    player.sendMessage(Colors.Rose + "Correct usage is: /newlabel [name] ");
+                    return true;
+                }
+                
+                int labelId = 3;
+                String label = split[1];
+                if (split.length >= 2) {
+                    for (int i = 2; i < split.length; i++)
+                        label += split[i];
+                }
+                
+                setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
+                log.info("[MapMarkers] "+player.getName()+" created a new label called "+label+".");
+                player.sendMessage(Colors.Green + "Label Created!");
+                
+            }
+            else if (split[0].equalsIgnoreCase("/dellabel")) {
+            //!TODO!add error checking to delete only existing labels
+                if (split.length < 2) {
+                    player.sendMessage(Colors.Rose + "Correct usage is: /dellabel [name] ");
+                    return true;
+                }
+                String label = split[1];
+                if (split.length >= 2) {
+                    for (int i = 2; i < split.length; i++)
+                        label += split[i];
+                }
+                
+                removeMarker(label);
+            
+                log.info("[MapMarkers] "+player.getName()+" deleted a label called "+label+".");
+                player.sendMessage(Colors.Green + "Label Deleted!");
+            
+          
+            }
+            //!TODO!add listlabels
+            
+            else
+                return false;
+            return true;
+        }
         
-		if (split[0].equalsIgnoreCase("/newlabel")) {
-		//!TODO!add error checking to look for existing labels
-            if (split.length < 2) {
-                player.sendMessage(Colors.Rose + "Correct usage is: /newlabel [name] ");
-                return true;
-            }
-            
-            int labelId = 3;
-            String label = split[1];
-            if (split.length >= 2) {
-                for (int i = 2; i < split.length; i++)
-                    label += split[i];
-            }
-            
-			setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
-			log.info("[MapMarkers] "+player.getName()+" created a new label called "+split[1]+".");
-            player.sendMessage(Colors.Green + "Label Created!");
-            
-        }
-		else if (split[0].equalsIgnoreCase("/dellabel")) {
-		//!TODO!add error checking to delete only existing labels
-            if (split.length < 2) {
-                player.sendMessage(Colors.Rose + "Correct usage is: /dellabel [name] ");
-                return true;
-            }
-            String label = split[1];
-            if (split.length >= 2) {
-                for (int i = 2; i < split.length; i++)
-                    label += split[i];
-            }
-            
-			removeMarker(label);
-		
-			log.info("[MapMarkers] "+player.getName()+" deleted a label called "+split[1]+".");
-			player.sendMessage(Colors.Green + "Label Deleted!");
-		
-	  
-        }
-		//!TODO!add listlabels
-		
-        else
-            return false;
-        return true;
-    }
-	
-	public void onPlayerMove(Player player, Location from, Location to) {
-		try {
-			setMarker(player.getName(),to.x, to.y, to.z, 4);
-			
-			if (available.tryAcquire()) {
-				// Update file
-				writeMarkers();
-				// Set timer to release in 3 secs
-				Timer timer = new Timer();
-				timer.schedule(new TimerTask() {
-						 public void run() {
-							available.release();
-						}
-					}
-					, 3*1000);
+        public void onPlayerMove(Player player, Location from, Location to) {
+            try {
+                setMarker(player.getName(),to.x, to.y, to.z, 4);
+                
+                if (available.tryAcquire()) {
+                    // Update file
+                    writeMarkers();
+                    // Set timer to release in 3 secs
+                    Timer timer = new Timer();
+                    timer.schedule(new TimerTask() {
+                             public void run() {
+                                available.release();
+                            }
+                        }
+                        , 3*1000);
 
-			}	
-		}
-		catch (Exception e) {
-			
-		}
-		
-	}
+                }	
+            }
+            catch (Exception e) {
+                
+            }
+            
+        }
     	
     }
 	
