@@ -198,7 +198,7 @@ public class GriefAlert extends Plugin{
 		if ( toggleAlertes  && !GriefAlertData.breakWatchIDs.isEmpty() ){
 			
 			short blocIndexInList = GriefAlertData.isBreakWatched(blocID);
-			if ( blocIndexInList>-1 && !player.canUseCommand( "/griefalert") ){
+			if ( blocIndexInList>-1 && !player.canUseCommand( "/griefalert") && block.getStatus()==3){
 				String playerName = player.getName();
 				boolean inList = false;
 				for (String p : playerList){
@@ -244,7 +244,7 @@ public class GriefAlert extends Plugin{
 		}
 		String locationName = setLocation(location);
 		
-		String messageAlerte = playerName+((destroy) ? " is breaking " : " used ")+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+block.getX()+","+block.getY()+","+block.getZ()+") - " + locationName;
+		String messageAlerte = playerName+((destroy) ? " just broke " : " used ")+(("aeiou".contains(blocName.substring(0, 1).toLowerCase())) ? "an " : "a ")+blocName+" at ("+block.getX()+","+block.getY()+","+block.getZ()+") - " + locationName;
 		
 		
 		log.info("Antigrief alarm : "+messageAlerte);
