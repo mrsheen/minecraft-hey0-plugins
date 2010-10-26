@@ -14,9 +14,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class MapMarkers extends Plugin {
-
+	
 	// Properties read from file
 	public int staleTimeout;
+	public int updateMarkerFile;
 	public String markersFile;
 	
 	// Internal variables
@@ -39,7 +40,7 @@ public class MapMarkers extends Plugin {
 	// Semaphore used for throttling (see onPlayerMove)
 	private final Semaphore available = new Semaphore(1, true);
 	
-	//!TODO!Extend superplugin from forum.hey0.net
+	//!TODO!Extend superplugin from forum.hey0.net, to remove boilerplate code
 	public MapMarkers() {
 		propertiesFile = new PropertiesFile("mapmarkers.properties");
 		dateFormat = new SimpleDateFormat("yyMMdd-HH.mm.ss");
@@ -79,6 +80,7 @@ public class MapMarkers extends Plugin {
 		}
 		
 		staleTimeout = propertiesFile.getInt("stale-timeout", 300);
+		updateMarkerFile = propertiesFile.getInt("update-markerfile", 3);
 		markersFile = propertiesFile.getString("markers", "world/markers.json");
 		
 		// Check for markers file, create if it doesnt exist
@@ -210,7 +212,7 @@ public class MapMarkers extends Plugin {
 				
 				// Determine timeout date
 				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.SECOND, staleTimeout);
+				cal.add(Calendar.SECOND, -staleTimeout); // Reil: Should be negative
 				date = cal.getTime();
 				
 				// Only dealing with player positons
@@ -336,7 +338,7 @@ public class MapMarkers extends Plugin {
 								available.release();
 							}
 						}
-						, 3*1000);
+						, updateMarkerFile*1000); // Reil: Use timeout from configuration, default 3 seconds
 				}
 			}
 			catch (Exception e) {
