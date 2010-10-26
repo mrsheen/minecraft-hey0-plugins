@@ -10,15 +10,15 @@ Commands:
 
 
 Features added:
-  *Labels spawn
+  *Labels spawn (configurable)
   *Create labels ingame
   *Delete labels ingame
   *Labels player location
-  *Players location is updated every 3seconds
+  *Players location is updated every 3seconds (default, can be configured)
+  *Player locations are removed on logout
   
 Features Planned:
-  -Configurable update of player location
-  -Player locations update on logout
+  -Hashtags for custom CSS/icons
 
 Icons IDs: (yet to be fully implemented)
   0: Origin, Default
@@ -29,6 +29,7 @@ Icons IDs: (yet to be fully implemented)
   5: Capitals
 
 Plugin Installation:
+  !Apologies for the mess, will clean up deployment procedure soon!
   *Copy MapMarkers.jar to plugins/ folder.
   *Add "MapMarkers" (without quotes) to the plugins line of server.properties
   *Insert /newlabel and/or /dellabel into groups.txt for any usergroups you wish to have acces to making labels.

@@ -15,10 +15,13 @@ import org.json.simple.parser.*;
 
 public class MapMarkers extends Plugin {
 	
+	private static final String LOG_PREFIX = "[MapMarkers] : "; // Ricin
+	
 	// Properties read from file
 	public int staleTimeout;
 	public int updateMarkerFile;
 	public String markersFile;
+	public boolean showSpawn;
 	
 	// Internal variables
 	public PropertiesFile propertiesFile;
@@ -50,23 +53,24 @@ public class MapMarkers extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.LOGIN, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, listener, this, PluginListener.Priority.LOW);
 	}
 	
 	public void enable() {
 		if (load()) {
-			log.info("[MapMarkers] Mod Enabled.");
+			log.info(LOG_PREFIX + "Mod Enabled.");
 			etc.getInstance().addCommand("/newlabel", "[label] - Adds new label at the current position");
 			etc.getInstance().addCommand("/dellabel", "[label] - Deletes label");
 		}
 		else {
-			log.info("[MapMarkers] Error while loading.");
+			log.info(LOG_PREFIX + "Error while loading.");
 		}
 	}
 	
 	public void disable() {
 		etc.getInstance().removeCommand("/newlabel");
 		etc.getInstance().removeCommand("/dellabel");
-		log.info("[MapMarkers] Mod Disabled.");
+		log.info(LOG_PREFIX + "Mod Disabled.");
 		
 	}
 	
@@ -82,6 +86,19 @@ public class MapMarkers extends Plugin {
 		staleTimeout = propertiesFile.getInt("stale-timeout", 300);
 		updateMarkerFile = propertiesFile.getInt("update-markerfile", 3);
 		markersFile = propertiesFile.getString("markers", "world/markers.json");
+		showSpawn = propertiesFile.getBoolean("show-spawn", false);
+		
+		try {
+			dateFormat = new SimpleDateFormat(propertiesFile.getString("date.format", "yyyyMMdd HH:mm:ss"));
+		}
+		catch (IllegalArgumentException e) {
+			//!TODO! Implement standard logging in superplugin
+			log.log(Level.SEVERE, LOG_PREFIX + "Invalid date format.  Please check the properties file.  For more info on the date format see here: http://goo.gl/YSes");
+			return false;
+		} catch (NullPointerException e) {
+			log.log(Level.SEVERE, LOG_PREFIX + "No date format specified.  Please check the properties file. For more info on the date format see here: http://goo.gl/YSes");
+			return false;
+		}
 		
 		// Check for markers file, create if it doesnt exist
 		try {
@@ -92,27 +109,32 @@ public class MapMarkers extends Plugin {
 				fout.write(markersArray.toString());
 				fout.close();
 		} catch (IOException e) {
-			log.log(Level.SEVERE, "[MapMarkers] : Exception while creating mapmarkers file.", e);
+			log.log(Level.SEVERE, LOG_PREFIX + "Exception while creating mapmarkers file.", e);
 		}
 		
 		// Save properties, useful in creating file with default values
 		try {
 			propertiesFile.save();
 		} catch (Exception e) {
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while saving mapmarkers properties file.", e);
+				log.log(Level.SEVERE, LOG_PREFIX + "Exception while saving mapmarkers properties file.", e);
 		}
 		
 		// Try to parse any existing markers
 		loadMarkers();
 		
 		//!TODO!Replace id with ENUM
-		// Add current spawn to marker list (will update if changed)
-		Location spawn = etc.getInstance().getServer().getSpawnLocation();
-		setMarker("Spawn",spawn.x, spawn.y, spawn.z, 0);
+		if (showSpawn) {
+			// Add current spawn to marker list (will update if changed)
+			Location spawn = etc.getInstance().getServer().getSpawnLocation();
+			setMarker("Spawn",spawn.x, spawn.y, spawn.z, 0);
+			
+			// Write out markers, to ensure file contains spawn
+			// (if there are no player logins, no other writes will occur)
+			writeMarkers();
+		}
 		
-		// Write out markers, to ensure spawn is there
-		// (if there are no player logins, no other writes will occur)
-		writeMarkers();
+		
+		
 		
 		return true;
 	}
@@ -141,6 +163,7 @@ public class MapMarkers extends Plugin {
 	}
 	
 	// Set marker properties in memory, will create marker if doesnt already exist, otherwise overwrite
+	@SuppressWarnings("unchecked") // Ricin
 	public void setMarker(String label, double x, double y, double z, int id, Date markerDate) {
 		int index = getMarkerIndex(label);
 		JSONObject newMarker = new JSONObject();
@@ -190,16 +213,16 @@ public class MapMarkers extends Plugin {
 
 			}
 			catch(ParseException pe){
-				log.log(Level.SEVERE, "[MapMarkers] : Parse exception while parsing line", pe);
+				log.log(Level.SEVERE, LOG_PREFIX + "Parse exception while parsing line", pe);
 			}
 			catch (Exception e) {
-				log.log(Level.SEVERE, "[MapMarkers] : Exception while parsing line", e);
+				log.log(Level.SEVERE, LOG_PREFIX + "Exception while parsing line", e);
 			}
 			
 			fin.close();
 			
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "[MapMarkers] : Exception while reading markers", e);
+			log.log(Level.SEVERE, LOG_PREFIX + "Exception while reading markers", e);
 		}
 		
 	}
@@ -232,8 +255,9 @@ public class MapMarkers extends Plugin {
 									removeMarker((String)marker.get("msg"));
 								}
 							}
-						}
-						catch(Exception e) {
+						} catch (java.text.ParseException e) {
+							log.log(Level.WARNING, LOG_PREFIX + "Unable to parse existing timestamp.  If you changed the format and reloaded the plugin, that is probably the cause.", e);
+						} catch(Exception e) {
 							//ee.printStackTrace();
 						}
 					}	
@@ -249,7 +273,7 @@ public class MapMarkers extends Plugin {
 			fout.close();
 			
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "[MapMarkers] : Exception while updating label", e);
+			log.log(Level.SEVERE, LOG_PREFIX + "Exception while updating label", e);
 		
 			return false;
 		}
@@ -272,6 +296,17 @@ public class MapMarkers extends Plugin {
 			
 		}
 		
+		public void onDisconnect(Player player) { // Ricin
+			try {
+				log.info(LOG_PREFIX + "Removing marker for " + player.getName());
+				removeMarker(player.getName());
+				writeMarkers();
+			}
+			catch (Exception e) {
+				
+			}
+		}
+		
 		public boolean onCommand(Player player, String[] split) {
 			if (!player.canUseCommand(split[0]))
 				return false;
@@ -287,13 +322,13 @@ public class MapMarkers extends Plugin {
 				String label = split[1];
 				if (split.length >= 2) {
 					for (int i = 2; i < split.length; i++)
-						label += split[i];
+						label += " " + split[i]; // Reil
 				}
 				
 				setMarker(label, player.getX(), player.getY(), player.getZ(), labelId);
 				
 				//!TODO!Check for success/failure before informing player
-				log.info("[MapMarkers] "+player.getName()+" created a new label called "+label+".");
+				log.info(LOG_PREFIX+player.getName()+" created a new label called "+label+".");
 				player.sendMessage(Colors.Green + "Label Created!");
 				
 			}
@@ -306,13 +341,13 @@ public class MapMarkers extends Plugin {
 				String label = split[1];
 				if (split.length >= 2) {
 					for (int i = 2; i < split.length; i++)
-						label += split[i];
+						label += " " + split[i]; // Reil
 				}
 				
 				removeMarker(label);
 				
 				//!TODO!Check for success/failure before informing player
-				log.info("[MapMarkers] "+player.getName()+" deleted a label called "+label+".");
+				log.info(LOG_PREFIX + player.getName()+" deleted a label called "+label+".");
 				player.sendMessage(Colors.Green + "Label Deleted!");
 			
 		  
