@@ -1,32 +1,24 @@
- ___  ___                            
- |  \/  |                            
- | .  . | __ _ _ __  _ __   ___ _ __ 
- | |\/| |/ _` | '_ \| '_ \ / _ \ '__|
- | |  | | (_| | |_) | |_) |  __/ |   
- \_|  |_/\__,_| .__/| .__/ \___|_|   
-              | |   | |              
-              |_|   |_|            
-
-        By: Chris H (Shadeness)
-	modified by: mrsheen
-	
-	v1.0
-
-_.-._.-._.-._.-._.-._.-._.-._.-._.-._
+MapMarkers
+------------------------------------------------------------
+ Adds markers to Minecraft Overviewer Google Maps interface
+------------------------------------------------------------
 
 Commands:
 /newlabel [name]
 /dellabel [name]
 
+
+
 Features added:
+  *Labels spawn
   *Create labels ingame
   *Delete labels ingame
-  *Labels player location (Currently only the location of where person last logged in)
-
-
+  *Labels player location
+  *Players location is updated every 3seconds
+  
 Features Planned:
-  -Make it so players location is updated every X amount of time
-  -Make it so player locations update on logout
+  -Configurable update of player location
+  -Player locations update on logout
 
 Icons IDs: (yet to be fully implemented)
   0: Origin, Default
@@ -37,7 +29,10 @@ Icons IDs: (yet to be fully implemented)
   5: Capitals
 
 Plugin Installation:
-  *Copy mapper.jar from /plugin and mapper.properties to plugins/ folder.
-  *Add "mapper" (without quotes) to the plugins line of server.properties
+  *Copy MapMarkers.jar to plugins/ folder.
+  *Add "MapMarkers" (without quotes) to the plugins line of server.properties
   *Insert /newlabel and/or /dellabel into groups.txt for any usergroups you wish to have acces to making labels.
-
+  *Edit mapmarkers.properties to set output directory of markers file to Minecraft-Overviewer map root
+     markers=path/to/map/markers.json
+  *Add map.js from Minecraft-Overviewer(see my fork) to index.html
+  *See forums.hey0.net for more information
