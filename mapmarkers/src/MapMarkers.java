@@ -46,7 +46,7 @@ public class MapMarkers extends Plugin {
 	//!TODO!Extend superplugin from forum.hey0.net, to remove boilerplate code
 	public MapMarkers() {
 		propertiesFile = new PropertiesFile("mapmarkers.properties");
-		dateFormat = new SimpleDateFormat("yyMMdd-HH.mm.ss");
+		dateFormat = new SimpleDateFormat("yyMMdd HH:mm:ss");
 	}
 	
 	public void initialize() {

@@ -28,7 +28,9 @@ public class Stats extends Plugin {
 	public SimpleDateFormat dateFormatLogEntry = new SimpleDateFormat("yyMMdd-HH.mm.ss");
 	public SimpleDateFormat dateFormatLogFile = new SimpleDateFormat("yyMMdd");
 
-    protected static final Logger log = Logger.getLogger("Minecraft");
+		// Standard plugin varaibles
+	private StatsListener listener = new StatsListener();
+	protected static final Logger log = Logger.getLogger("Minecraft");
 	protected static final Logger statLogger = Logger.getLogger("Stats");
     private final String newLine = System.getProperty("line.separator");
     private final String fileSep = System.getProperty("file.separator");
@@ -47,6 +49,29 @@ public class Stats extends Plugin {
     public Stats() {
 		propertiesFile = new PropertiesFile("stats.properties");
 		statLogger.setUseParentHandlers(false);
+	}
+	
+	public void initialize() {
+		etc.getLoader().addListener(PluginLoader.Hook.LOGIN, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.LOGINCHECK, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.CHAT, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
+		//etc.getLoader().addListener(PluginLoader.Hook.SERVERCOMMAND, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.BAN, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.IPBAN, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.KICK, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_CHANGE, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.INVENTORY_CHANGE, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_SEND, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.NUM_HOOKS, listener, this, PluginListener.Priority.LOW);
+		//etc.getLoader().addListener(PluginLoader.Hook.TELEPORT, listener, this, PluginListener.Priority.LOW);
+		
+        
 	}
 	
 	public boolean load() {
@@ -120,99 +145,6 @@ public class Stats extends Plugin {
 		
     }
 
-    public String onLoginChecks(String user) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void onLogin(Player player) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setLogin();
-		
-		statLogger.log(logRecord);
-    }
-	
-	public void onDisconnect(Player player) { 
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setDisconnect();
-		
-		statLogger.log(logRecord);
-	}
-
-    public boolean onChat(Player player, String chatMessage) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setChat(chatMessage);
-		
-		statLogger.log(logRecord);
-		
-		return false;
-    }
-
-    public boolean onCommand(Player player, String[] split) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setCommand(split);
-		
-		statLogger.log(logRecord);
-		
-		return false;
-    }
-
-    public void onBan(Player player, String reason) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setBan(reason);
-		
-		statLogger.log(logRecord);
-		
-		
-    }
-
-    public void onIpBan(Player player, String reason) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setIpBan(reason);
-		
-		statLogger.log(logRecord);
-    }
-
-    public void onKick(Player player, String reason) {
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setKick(reason);
-		
-		statLogger.log(logRecord);
-    }
-	
-    public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int item) { 
-    	StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setCreate(blockPlaced, blockClicked, item);
-		
-		statLogger.log(logRecord);
-		
-		return false;
-    }
-    public boolean onBlockDestroy(Player player, Block block) { 
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setDestroy(block);
-		
-		statLogger.log(logRecord);
-		
-		return false;
-    }
-
-    public void onPlayerMove(Player player, Location fromLocation, Location toLocation) {
-	
-		StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
-		
-		logRecord.setMovement(fromLocation, toLocation, Math.abs(fromLocation.x - toLocation.x) + Math.abs(fromLocation.y - toLocation.y) + Math.abs(fromLocation.z - toLocation.z));
-		
-		statLogger.log(logRecord);
-	}
 		
 
 	public void createLogger(String table, int bufferSize) {
@@ -247,5 +179,103 @@ public class Stats extends Plugin {
 		}
 	}
 	
+	
+	// Plugin listeners, to register for server mod hooks
+	public class StatsListener extends PluginListener {
+		
+		public String onLoginChecks(String user) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public void onLogin(Player player) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setLogin();
+			
+			statLogger.log(logRecord);
+		}
+		
+		public void onDisconnect(Player player) { 
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setDisconnect();
+			
+			statLogger.log(logRecord);
+		}
+
+		public boolean onChat(Player player, String chatMessage) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setChat(chatMessage);
+			
+			statLogger.log(logRecord);
+			
+			return false;
+		}
+
+		public boolean onCommand(Player player, String[] split) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setCommand(split);
+			
+			statLogger.log(logRecord);
+			
+			return false;
+		}
+
+		public void onBan(Player player, String reason) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setBan(reason);
+			
+			statLogger.log(logRecord);
+			
+			
+		}
+
+		public void onIpBan(Player player, String reason) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setIpBan(reason);
+			
+			statLogger.log(logRecord);
+		}
+
+		public void onKick(Player player, String reason) {
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setKick(reason);
+			
+			statLogger.log(logRecord);
+		}
+		
+		public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int item) { 
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setCreate(blockPlaced, blockClicked, item);
+			
+			statLogger.log(logRecord);
+			
+			return false;
+		}
+		public boolean onBlockDestroy(Player player, Block block) { 
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setDestroy(block);
+			
+			statLogger.log(logRecord);
+			
+			return false;
+		}
+
+		public void onPlayerMove(Player player, Location fromLocation, Location toLocation) {
+		
+			StatsLogRecord logRecord = new StatsLogRecord(player.getName().toLowerCase());
+			
+			logRecord.setMovement(fromLocation, toLocation, Math.abs(fromLocation.x - toLocation.x) + Math.abs(fromLocation.y - toLocation.y) + Math.abs(fromLocation.z - toLocation.z));
+			
+			statLogger.log(logRecord);
+		}
+	}
 	
 }
