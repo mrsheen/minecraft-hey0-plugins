@@ -7,9 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.LogRecord;
 import java.util.logging.Formatter;
-import java.util.Date.*;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
+
 import java.util.Arrays;
 
 
@@ -20,15 +18,8 @@ public class Stats extends Plugin {
 
 	public PropertiesFile propertiesFile;
 	
-	public Date date;
-	public Date oldDate;
-	public Calendar cal;
-	public String[] lineArray;
 	
-	public SimpleDateFormat dateFormatLogEntry = new SimpleDateFormat("yyMMdd-HH.mm.ss");
-	public SimpleDateFormat dateFormatLogFile = new SimpleDateFormat("yyMMdd");
-
-		// Standard plugin varaibles
+	// Standard plugin varaibles
 	private StatsListener listener = new StatsListener();
 	protected static final Logger log = Logger.getLogger("Minecraft");
 	protected static final Logger statLogger = Logger.getLogger("Stats");
