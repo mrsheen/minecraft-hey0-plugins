@@ -10,12 +10,15 @@ public class MCAUtils extends Plugin {
     private MCAUtilsListener listener = new MCAUtilsListener();
 	static final Logger log = Logger.getLogger("Minecraft");
 	private Server server = etc.getServer();
+    private Properties  props; 
+    private int[] disalloweditems;
 
-	 private Timer SaveAllTicker;
-	 private int SaveAllTickInterval = 900000;
+	private Timer SaveAllTicker;
+	private long SaveAllTickInterval = 3600000;
 	
     public void enable() {
 		log.info("[MCAUtils] Mod Enabled.");
+		loadprops();
 		SaveAllTicker = new Timer();
 		SaveAllTicker.schedule(new SaveAllTickerTask(), SaveAllTickInterval, SaveAllTickInterval);
     }
@@ -31,6 +34,45 @@ public class MCAUtils extends Plugin {
     	etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
     }
     
+    private void loadprops()
+    {
+        props = new Properties();
+       	props.setProperty("disalloweditems", "19,66,328,342,343");
+       	props.setProperty("saveallintervalinminutes", "60");
+        
+        try {
+             props.load(new FileInputStream("MCAUtils.properties"));
+       	}
+        catch(IOException e) {
+             e.printStackTrace();
+        }
+        
+        if(props.getProperty("disalloweditems") != "") {
+       		String[] stringdisalloweditems = props.getProperty("disalloweditems").split(",");
+       		disalloweditems = new int[stringdisalloweditems.length];
+       		for (int i=0;i<stringdisalloweditems.length;i++) {
+       			disalloweditems[i] = Integer.parseInt(stringdisalloweditems[i]);
+       		}
+        }
+        
+        if(props.getProperty("saveallintervalinminutes") != "") {
+        	try {
+        		SaveAllTickInterval = Long.parseLong(props.getProperty("saveallintervalinminutes").trim()) * 60000;
+        	} catch (NumberFormatException nfe) {
+        		log.info(props.getProperty("saveallintervalinminutes") + " is not a valid time in minutes");
+        	}
+        }
+        
+		try {
+			OutputStream propOut = new FileOutputStream(new File("MCAUtils.properties"));
+        	props.store(propOut, "Properties for the MCAUtils plugin");
+		}
+		catch(IOException e) {
+             e.printStackTrace();
+        }
+        return;
+    }
+    
     private class SaveAllTickerTask extends TimerTask {
         public void run() {
         	log.info("MCAUtils is calling a save-all");
@@ -38,9 +80,6 @@ public class MCAUtils extends Plugin {
         }
     }
     
-    
-    
-
     public class MCAUtilsListener extends PluginListener
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
