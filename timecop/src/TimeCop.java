@@ -47,12 +47,12 @@ public class TimeCop extends Plugin {
     			if(split[1].equalsIgnoreCase("day")) {
     				player.sendMessage("Daytime enforced!");
     				timetofreeze = 6000;
-    				etc.getServer().setTime(timetofreeze);
+    				setthetime(timetofreeze);
     				curmode = 1;
     			} else if(split[1].equalsIgnoreCase("night")) {
     				player.sendMessage("Nighttime enforced!");
     				timetofreeze = 18000;
-    				etc.getServer().setTime(timetofreeze);
+    				setthetime(timetofreeze);
     				curmode = 1;
     				
     			} else {
@@ -66,7 +66,7 @@ public class TimeCop extends Plugin {
     		} else if (split[0].equalsIgnoreCase("/freezetime") && (split.length>1)) {
     			if(converttime(split[1]) != -1) {
     				timetofreeze = converttime(split[1]);
-    				etc.getServer().setTime(timetofreeze);
+    				setthetime(timetofreeze);
     				curmode = 1;
     				player.sendMessage("Time Frozen");
     			} else {
@@ -78,7 +78,7 @@ public class TimeCop extends Plugin {
     				if(split[1].equalsIgnoreCase("day")) {
     					loopfrom = 24000;
     					loopto = 11000;
-    					etc.getServer().setTime(loopfrom);
+    					setthetime(loopfrom);
     					curmode = 2;
     				} else if(split[1].equalsIgnoreCase("night")) {
     					player.sendMessage("You want to loop night? Not implemented yet!");
@@ -90,7 +90,7 @@ public class TimeCop extends Plugin {
     				if(converttime(split[1])!=-1 && converttime(split[2])!=-1) {
     					loopfrom = converttime(split[1]);
     					loopto = converttime(split[2]);
-    					etc.getServer().setTime(loopfrom);
+    					setthetime(loopfrom);
     					curmode = 2;
     					player.sendMessage("Timeloop started");
     				} else {
