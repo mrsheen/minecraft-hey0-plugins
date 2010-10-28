@@ -7,7 +7,6 @@ import java.util.*;
 
 public class MCAUtils extends Plugin {
 	
-    private MCAUtilsListener listener = new MCAUtilsListener();
 	static final Logger log = Logger.getLogger("Minecraft");
 	private Server server = etc.getServer();
     private Properties  props; 
@@ -15,6 +14,12 @@ public class MCAUtils extends Plugin {
 
 	private Timer SaveAllTicker;
 	private long SaveAllTickInterval = 3600000;
+
+	PluginRegisteredListener walkListener;
+	PluginRegisteredListener blockcreateListener;
+
+	walkListener listener_walk = new walkListener();
+	blockcreateListener listener_blockcreate = new blockcreateListener();
 	
     public void enable() {
 		log.info("[MCAUtils] Mod Enabled.");
@@ -28,12 +33,13 @@ public class MCAUtils extends Plugin {
         if (SaveAllTicker != null) {
             SaveAllTicker.cancel();
         }
-        //etc.getLoader().removeListener();
+        etc.getLoader().removeListener(walkListener);
+        etc.getLoader().removeListener(blockcreateListener);
     }
     
     public void initialize() {
-    	etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
-    	etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
+    	blockcreateListener = etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener_blockcreate, this, PluginListener.Priority.MEDIUM);
+    	walkListener = etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener_walk, this, PluginListener.Priority.MEDIUM);
     }
     
     private void loadprops()
@@ -82,7 +88,16 @@ public class MCAUtils extends Plugin {
         }
     }
     
-    public class MCAUtilsListener extends PluginListener
+    public class walkListener extends PluginListener {
+		public void onPlayerMove(Player player, Location from, Location to) {
+			if(player.getY()<-300) {
+				player.setY(300);
+			}
+		}
+    }
+    
+    
+    public class blockcreateListener extends PluginListener
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
     		//whitelist fire
@@ -122,12 +137,6 @@ public class MCAUtils extends Plugin {
 				return true;
 			}
 			return false;
-		}
-		
-		public void onPlayerMove(Player player, Location from, Location to) {
-			if(player.getY()<-300) {
-				player.setY(300);
-			}
 		}
     }
     
