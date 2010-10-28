@@ -38,10 +38,13 @@ public class MCAUtils extends Plugin {
         }
     }
     
+    
+    
 
     public class MCAUtilsListener extends PluginListener
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
+    		//whitelist fire
 			if(itemInHand==259 || itemInHand==51) {
 				if(player.canUseCommand("/usefire")) {
 					player.sendMessage("Be careful with that fire");
@@ -50,6 +53,32 @@ public class MCAUtils extends Plugin {
 					player.sendMessage("You can't use fire. Ask an admin to use it for you");
 					return true;
 				}
+			}
+			//feather
+			else if ( itemInHand==288 && player.canUseCommand("/allowfirefeather")){
+				for ( int i = (blockClicked.getX()-8); i<= blockClicked.getX()+8; i++ ){
+					for ( int j = blockClicked.getY(); j<= 128; j++ ){
+						for ( int k = (blockClicked.getZ()-8); k<= (blockClicked.getZ()+8); k++ ){
+							if( server.getBlockIdAt(i, j, k) == 51 ){
+								server.setBlockAt(0,i,j,k);
+							}
+						}
+					}
+				}
+				return true;
+			}
+			// String
+			else if ( itemInHand==287 && player.canUseCommand("/allowlavastring")){
+				for ( int i = (blockClicked.getX()-2); i<= blockClicked.getX()+2; i++ ){
+					for ( int j = blockClicked.getY(); j<= 128; j++ ){
+						for ( int k = (blockClicked.getZ()-2); k<= (blockClicked.getZ()+2); k++ ){
+							if( server.getBlockIdAt(i, j, k) == 11 || server.getBlockIdAt(i, j, k) == 10){
+								server.setBlockAt(0,i,j,k);
+							}
+						}
+					}
+				}
+				return true;
 			}
 			return false;
 		}
