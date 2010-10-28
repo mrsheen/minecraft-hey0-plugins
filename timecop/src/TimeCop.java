@@ -43,6 +43,7 @@ public class TimeCop extends Plugin {
     
         public class TimeCopListener extends PluginListener {
         	    public boolean onCommand(Player player,String[] split) {
+        	    	if(player.canUseCommand("/timecop")) {
     		if (split[0].equalsIgnoreCase("/enforcetime") && (split.length>1)) {
     			if(split[1].equalsIgnoreCase("day")) {
     				player.sendMessage("Daytime enforced!");
@@ -106,6 +107,8 @@ public class TimeCop extends Plugin {
     			player.sendMessage("The time is " + etc.getServer().getTime());
     			return true;
     	}
+        	    		
+        	    	}
     	return false;
    	}
         	
