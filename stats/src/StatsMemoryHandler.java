@@ -42,7 +42,7 @@ public class StatsMemoryHandler extends MemoryHandler {
 		
 		if (currentLogLines >= maxLogLines - 1) {
 			//log.info("Pushing : " + Integer.toString(currentLogLines) + Integer.toString(maxLogLines));
-			log.info("[Stats] : Pushing " + Integer.toString(currentLogLines) + " to database");
+			log.info("[Stats] : Pushing " + Integer.toString(currentLogLines) + " records to database");
 			currentLogLines = 0;
 			// Condition occurred so dump buffered records
 			push();
