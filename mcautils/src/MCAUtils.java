@@ -28,10 +28,12 @@ public class MCAUtils extends Plugin {
         if (SaveAllTicker != null) {
             SaveAllTicker.cancel();
         }
+        //etc.getLoader().removeListener();
     }
     
     public void initialize() {
     	etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
+    	etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
     }
     
     private void loadprops()
@@ -120,6 +122,12 @@ public class MCAUtils extends Plugin {
 				return true;
 			}
 			return false;
+		}
+		
+		public void onPlayerMove(Player player, Location from, Location to) {
+			if(player.getY()<-300) {
+				player.setY(300);
+			}
 		}
     }
     
