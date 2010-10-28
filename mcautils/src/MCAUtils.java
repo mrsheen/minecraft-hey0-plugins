@@ -9,7 +9,7 @@ public class MCAUtils extends Plugin {
 	
 	static final Logger log = Logger.getLogger("Minecraft");
 	private Server server = etc.getServer();
-    private Properties  props; 
+    //private Properties  props; 
     private int[] disalloweditems;
 
 	private Timer SaveAllTicker;
@@ -23,7 +23,7 @@ public class MCAUtils extends Plugin {
 	
     public void enable() {
 		log.info("[MCAUtils] Mod Enabled.");
-		loadprops();
+		loadProperties();
 		SaveAllTicker = new Timer();
 		SaveAllTicker.schedule(new SaveAllTickerTask(), SaveAllTickInterval, SaveAllTickInterval);
     }
@@ -41,6 +41,19 @@ public class MCAUtils extends Plugin {
     	blockcreateListener = etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener_blockcreate, this, PluginListener.Priority.MEDIUM);
     	walkListener = etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener_walk, this, PluginListener.Priority.MEDIUM);
     }
+    
+	private void loadProperties(){
+		PropertiesFile properties = new PropertiesFile("MCAUtilsPlugin.properties");
+		try {
+			SaveAllTickInterval = properties.getLong("saveallintervalinminutes", 60) * 60000;
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Exception while reading from MCAUtilsPlugin.properties", e);
+        }
+        // TODO : non-existant file
+	}
+    /*
+    
+    worser
     
     private void loadprops()
     {
@@ -79,7 +92,7 @@ public class MCAUtils extends Plugin {
              e.printStackTrace();
         }
         return;
-    }
+    }*/
     
     private class SaveAllTickerTask extends TimerTask {
         public void run() {
