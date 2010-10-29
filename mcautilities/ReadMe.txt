@@ -1,1 +1,0 @@
-After you put "Jump.jar" in bin/plugins to get this to work you need to add "Jump" to the plugins list in server.properties and "/jump,/accept" to the "deafult" group in groups.txt

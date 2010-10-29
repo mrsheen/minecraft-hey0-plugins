@@ -1,1 +1,0 @@
-After you put "blockitemuse.jar" in bin/plugins to get this to work you need to add "blockitemuse" to the plugins list in server.properties
