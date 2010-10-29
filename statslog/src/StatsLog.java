@@ -44,7 +44,7 @@ public class StatsLog extends Plugin {
 	protected static final Logger log = Logger.getLogger("Minecraft");
 	private static final String LOG_PREFIX = "[StatsLog] : ";
 	
-	private int minEditWin,maxEditWin, maxLogLines,maxResultRows;
+	private int minEditWin;
 	
 	private Connection connection;
 	
@@ -99,9 +99,9 @@ public class StatsLog extends Plugin {
 	public boolean load() {
         properties = new PropertiesFile("statslog.properties");
 		minEditWin = properties.getInt("minEditWindow", 60*5);
-        maxEditWin = properties.getInt("maxEditWin", 60*20);
-        maxLogLines = properties.getInt("maxLogLines", 200);
-		maxResultRows = properties.getInt("maxResultRows", 100);
+        //maxEditWin = properties.getInt("maxEditWin", 60*20);
+        //maxLogLines = properties.getInt("maxLogLines", 200);
+		//maxResultRows = properties.getInt("maxResultRows", 100);
 		boolean doSchemaCheck = properties.getBoolean("doSchemaCheck", true);
 		String dbpropfile = properties.getString("dbPropertiesFile", "mysql.properties");
 		properties.save();
@@ -267,10 +267,18 @@ public class StatsLog extends Plugin {
 					return;
 				}
 				
+				
+				
 				try {
-					// group the inserts into batches of 100 that get written to db together.
-					for(StatRecord record : pendingRecords) {
-						synchronized(connection) {
+				
+					while(true) {
+						synchronized(pendingRecords) {
+							if(pendingRecords.isEmpty() || numSaved == 100) {
+								break;
+							}
+							StatRecord record = pendingRecords.get(0);
+							pendingRecords.remove(record);
+							
 							record.executeStatement();
 							numSaved++;
 							
@@ -281,7 +289,7 @@ public class StatsLog extends Plugin {
 							}
 						}
 					}
-					pendingRecords.clear();
+					
 					
 				} catch (SQLException ex) {
 		            log.log(Level.SEVERE, LOG_PREFIX+"Error writing to database", ex);
@@ -353,10 +361,11 @@ public class StatsLog extends Plugin {
 			return false;
 		}
 		public boolean onBlockDestroy(Player player, Block block) { 
-			ActionRecord record = new ActionRecord(GetPlayerID(player.getName().toLowerCase()));
-			record.setDestroy(block);
-			pendingRecords.add(record);
-			
+			if (block.getStatus()==3) {
+				ActionRecord record = new ActionRecord(GetPlayerID(player.getName().toLowerCase()));
+				record.setDestroy(block);
+				pendingRecords.add(record);
+			}
 			return false;
 		}
 
