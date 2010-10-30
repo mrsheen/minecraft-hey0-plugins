@@ -83,11 +83,11 @@ public class CuboidProtection {
 		int[] firstPoint = Cuboid.getPoint(playerName, false);
 		int[] secondPoint = Cuboid.getPoint(playerName, true);
 		
-		if( firstPoint[1] == secondPoint[1] ){	// s'ils sont à la même hauteur
+		if( firstPoint[1] == secondPoint[1] ){	// s'ils auteur
 			firstPoint[1]-=addedHeight;
 			secondPoint[1]+=addedHeight;
 		}
-		ProtectedCuboids.add(firstPoint[0]);	// Méthode plus élégante
+		ProtectedCuboids.add(firstPoint[0]);	//  pl
 		ProtectedCuboids.add(firstPoint[1]);
 		ProtectedCuboids.add(firstPoint[2]);
 		ProtectedCuboids.add(secondPoint[0]);
@@ -145,8 +145,13 @@ public class CuboidProtection {
 	            StringBuilder newFile = new StringBuilder();
 	            
 	            for (int i = 0; i<ProtectedCuboidsNames.size(); i++){
-	            	newFile.append( firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]
+	            	if(ProtectedCuboidsNames.get(i).equals(cuboidName)) {
+	            		newFile.append( firstPoint[0]+","+firstPoint[1]+","+firstPoint[2]+","+secondPoint[0]+","+secondPoint[1]
 	            	    +","+secondPoint[2]+","+ProtectedCuboidsOwners.get(i)+","+ProtectedCuboidsNames.get(i) ).append("\r\n");
+	            	} else {
+	            		newFile.append( ProtectedCuboids.get(i*6)+","+ProtectedCuboids.get(i*6+1)+","+ProtectedCuboids.get(i*6+2)+","+ProtectedCuboids.get(i*6+3)+","+ProtectedCuboids.get(i*6+4)+","+ProtectedCuboids.get(i*6+5)+","+ProtectedCuboidsOwners.get(i)+","+ProtectedCuboidsNames.get(i) ).append("\r\n");
+	            	}
+	            	
 	            }
 
 	            FileWriter writer = new FileWriter("protectedCuboids.txt");
@@ -417,8 +422,7 @@ public class CuboidProtection {
 			            	}
 			            	else{
 			            		newFile.append( ProtectedCuboids.get(i*6)+","+ProtectedCuboids.get(i*6+1)+","
-			            				+ProtectedCuboids.get(i*6+2)+","+ProtectedCuboids.get(i*6+3)+","+ProtectedCuboids.get(i*6+4)
-			            				+","+ProtectedCuboids.get(i*6+5)+","+ProtectedCuboidsOwners.get(i)+","
+			            				+ProtectedCuboids.get(i*6+2)+","+ProtectedCuboids.get(i*6+3)+","+ProtectedCuboids.get(i*6+4)+","+ProtectedCuboids.get(i*6+5)+","+ProtectedCuboidsOwners.get(i)+","
 			            				+ProtectedCuboidsNames.get(i) ).append("\r\n");
 			            	}
 			            }
