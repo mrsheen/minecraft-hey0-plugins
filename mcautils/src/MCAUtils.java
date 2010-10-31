@@ -123,7 +123,7 @@ public class MCAUtils extends Plugin {
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
     		//block item if disallowed
-    		if(disalloweditems.length>0 && player.canUseCommand("/useblockeditems")) {
+    		if(disalloweditems.length>0 && !player.canUseCommand("/useblockeditems")) {
 				for (int i = 0; i<disalloweditems.length;i++) {
 					if (itemInHand == disalloweditems[i]) {
 						player.sendMessage("The use of this item has been blocked. Talk to an admin for more info");
