@@ -46,6 +46,15 @@ public class MCAUtils extends Plugin {
 		PropertiesFile properties = new PropertiesFile("MCAUtilsPlugin.properties");
 		try {
 			SaveAllTickInterval = properties.getLong("saveallintervalinminutes", 60) * 60000;
+			String[] stringdisalloweditems = properties.getString("disalloweditems", "19,66,328,342,343").split(",");
+       		disalloweditems = new int[stringdisalloweditems.length];
+       		for (int i=0;i<stringdisalloweditems.length;i++) {
+       			try {
+       				disalloweditems[i] = Integer.parseInt(stringdisalloweditems[i]);
+       			} catch (NumberFormatException nfe) {
+       				disalloweditems[i] = -2;
+       			}
+       		}
         } catch (Exception e) {
             log.log(Level.SEVERE, "Exception while reading from MCAUtilsPlugin.properties", e);
         }
@@ -113,6 +122,15 @@ public class MCAUtils extends Plugin {
     public class blockcreateListener extends PluginListener
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
+    		//block item if disallowed
+    		if(disalloweditems.length>0 && player.canUseCommand("/useblockeditems")) {
+				for (int i = 0; i<disalloweditems.length;i++) {
+					if (itemInHand == disalloweditems[i]) {
+						player.sendMessage("The use of this item has been blocked. Talk to an admin for more info");
+						return true;
+					}
+				}
+			}
     		//whitelist fire
 			if(itemInHand==259 || itemInHand==51) {
 				if(player.canUseCommand("/usefire")) {
