@@ -8,6 +8,7 @@ public class Stargate extends Plugin {
 
 
     private StargateListener listener = new StargateListener();
+	static Server world = etc.getServer();
 
 	static final Logger log = Logger.getLogger("Minecraft");
 	
@@ -54,11 +55,12 @@ public class Stargate extends Plugin {
             return false;
         }
         if (split[0].equalsIgnoreCase("/saveStargate")) {
-        	if (split.length == 4) {
+        	if (split.length == 5) {
 	        	StargateData.Savestargate(player,split);
         	}
 			return true;
         } else if (split[0].equalsIgnoreCase("/listStargates")) {
+        	//world.setBlockAt(20,(int)Math.floor(player.getX()),(int)Math.floor(player.getY()),(int)Math.floor(player.getZ()));
         	return true;
         } else if (split[0].equalsIgnoreCase("/removeStargate")) {
         	boolean worked = false;
