@@ -216,13 +216,30 @@ public class Test extends Plugin {
         				fireblockLoc.get(i*3+2) == (int)Math.floor(portal.loc1.z)) {
         					log.info("Found a player");
         					player=server.getPlayer(playerList.get(i));
+        					playerList.remove(i);
+        					fireblockTimestamps.remove(i);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
+        			} else if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc2.x) && 
+        						fireblockLoc.get(i*3+1) == (int)Math.floor(portal.loc2.y) && 
+        						fireblockLoc.get(i*3+2) == (int)Math.floor(portal.loc2.z)) {
+        					log.info("Found a player");
+        					player=server.getPlayer(playerList.get(i));
+        					playerList.remove(i);
+        					fireblockTimestamps.remove(i);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
+        				
+        			} else {
+        				if((curtime - fireblockTimestamps.get(i))>60) {
+        					playerList.remove(i);
+        					fireblockTimestamps.remove(i);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
+        					fireblockLoc.remove(i*3);
         				}
-        			if((curtime - fireblockTimestamps.get(i))>60) {
-        				playerList.remove(i);
-        				fireblockTimestamps.remove(i);
-        				fireblockLoc.remove(i*3);
-        				fireblockLoc.remove(i*3);
-        				fireblockLoc.remove(i*3);
         			}
         		}
         	}
