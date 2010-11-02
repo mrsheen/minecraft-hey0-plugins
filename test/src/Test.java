@@ -182,10 +182,8 @@ public class Test extends Plugin {
 			if(destPortal.loc1.x == destPortal.loc2.x) {
 				destx = destPortal.loc1.x + 0.5D;
 			} else if(destPortal.loc1.x<destPortal.loc2.x) {
-				//destx = (destPortal.loc2.x-destPortal.loc1.x)/2 + destPortal.loc1.x;
 				destx = destPortal.loc2.x;
 			} else {
-				//destx = (destPortal.loc1.x-destPortal.loc2.x)/2 + destPortal.loc2.x;
 				destx = destPortal.loc1.x;
 			}
 			
@@ -193,10 +191,8 @@ public class Test extends Plugin {
 			if(destPortal.loc1.z == destPortal.loc2.z) {
 				destz = destPortal.loc1.z + 0.5D;
 			} else if(destPortal.loc1.z<destPortal.loc2.z) {
-				//destz = (destPortal.loc2.z-destPortal.loc1.z)/2 + destPortal.loc1.z;
 				destx = destPortal.loc2.z;
 			} else {
-				//destz = (destPortal.loc1.z-destPortal.loc2.z)/2 + destPortal.loc2.z;
 				destx = destPortal.loc1.z;
 			}
 			
