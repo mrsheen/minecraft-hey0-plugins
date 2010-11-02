@@ -75,6 +75,8 @@ public class Test extends Plugin {
         if(player!=null) {
         	player.sendMessage("You did it!");
         	log.info("Portal created by "+player.getName());
+        } else {
+        	log.info("Portal created by a null player");
         }
         
         Sign namingsign = getNameSign(portal);
@@ -205,18 +207,21 @@ public class Test extends Plugin {
         public boolean onPortalCreate(Portal portal) {
         	Player player=null;
         	long curtime = date.getTime();
-        	for(int i=playerList.size()-1;i>=0;i--) {
-        		if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc1.x) && 
-        			fireblockLoc.get(i*3+1) == (int)Math.floor(portal.loc1.y) && 
-        			fireblockLoc.get(i*3+2) == (int)Math.floor(portal.loc1.z)) {
-        				player=server.getPlayer(playerList.get(i));
+        	if(playerList.size()>0) {
+        		for(int i=playerList.size()-1;i>=0;i--) {
+        			if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc1.x) && 
+        				fireblockLoc.get(i*3+1) == (int)Math.floor(portal.loc1.y) && 
+        				fireblockLoc.get(i*3+2) == (int)Math.floor(portal.loc1.z)) {
+        					log.info("Found a player");
+        					player=server.getPlayer(playerList.get(i));
+        				}
+        			if((curtime - fireblockTimestamps.get(i))>60) {
+        				playerList.remove(i);
+        				fireblockTimestamps.remove(i);
+        				fireblockLoc.remove(i*3);
+        				fireblockLoc.remove(i*3);
+        				fireblockLoc.remove(i*3);
         			}
-        		if((curtime - fireblockTimestamps.get(i))>60) {
-        			playerList.remove(i);
-        			fireblockTimestamps.remove(i);
-        			fireblockLoc.remove(i*3);
-        			fireblockLoc.remove(i*3);
-        			fireblockLoc.remove(i*3);
         		}
         	}
 			return addPortal(player,portal);
@@ -256,15 +261,17 @@ public class Test extends Plugin {
         public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
     		 if(blockPlaced.getType() == 51) {
     		 	if(server.getBlockIdAt(blockPlaced.getX(),blockPlaced.getY()-1,blockPlaced.getZ())==49) {
-        			for(int i=playerList.size()-1;i>=0;i--) {
-        				if (fireblockLoc.get(i*3) == blockPlaced.getX() && 
-        					fireblockLoc.get(i*3+1) == blockPlaced.getY() && 
-        					fireblockLoc.get(i*3+2) == blockPlaced.getZ()) {
-        					playerList.set(i,player.getName());
-        					fireblockTimestamps.set(i,date.getTime());
-        					return false;
+    		 		if(playerList.size()>0) {
+        				for(int i=playerList.size()-1;i>=0;i--) {
+        					if (fireblockLoc.get(i*3) == blockPlaced.getX() && 
+        						fireblockLoc.get(i*3+1) == blockPlaced.getY() && 
+        						fireblockLoc.get(i*3+2) == blockPlaced.getZ()) {
+        						playerList.set(i,player.getName());
+        						fireblockTimestamps.set(i,date.getTime());
+        						return false;
+        					}
         				}
-        			}
+    		 		}
     		 		player.sendMessage("Fire on obsidian");
     		 		playerList.add(player.getName());
     		 		fireblockLoc.add(blockPlaced.getX());
