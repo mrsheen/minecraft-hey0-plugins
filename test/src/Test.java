@@ -73,7 +73,6 @@ public class Test extends Plugin {
         }
         
         if(player!=null) {
-        	player.sendMessage("You did it!");
         	log.info("Portal created by "+player.getName());
         } else {
         	log.info("Portal created by a null player");
@@ -233,8 +232,6 @@ public class Test extends Plugin {
         public boolean onPortalCreate(Portal portal) {
         	Player player=null;
         	long curtime = date.getTime();
-        	log.info("Loc1 block type is "+server.getBlockIdAt((int)Math.floor(portal.loc1.x),(int)Math.floor(portal.loc1.y),(int)Math.floor(portal.loc1.z)));
-        	server.setBlockAt(20,(int)Math.floor(portal.loc1.x),(int)Math.floor(portal.loc1.y),(int)Math.floor(portal.loc1.z));
         	if(playerList.size()>0) {
         		for(int i=playerList.size()-1;i>=0;i--) {
         			if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc1.x) && 
