@@ -141,7 +141,6 @@ public class Test extends Plugin {
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
-						log.info (destsign.getText(i).toLowerCase());
 						if(destsign.getText(i).trim().equalsIgnoreCase("lock")) {
 							signlock = 1;
 						} else if(destportalname=="") {
@@ -190,27 +189,27 @@ public class Test extends Plugin {
 			if(destPortal.loc1.z == destPortal.loc2.z) {
 				destz = destPortal.loc1.z + 0.5D;
 			} else if(destPortal.loc1.z<destPortal.loc2.z) {
-				destx = destPortal.loc2.z;
+				destz = destPortal.loc2.z;
 			} else {
-				destx = destPortal.loc1.z;
+				destz = destPortal.loc1.z;
 			}
 			
 			int destPortalIndex = getPortalIndex(destPortal.Name);
 			int rotmult = 0;
 			if(protectedSigns.get(destPortalIndex*3)>destPortal.loc1.x &&
 				protectedSigns.get(destPortalIndex*3)>destPortal.loc2.x) {
-				rotmult = 1;	
+				rotmult = 3;	
 			} else if(protectedSigns.get(destPortalIndex*3)<destPortal.loc1.x &&
 				protectedSigns.get(destPortalIndex*3)<destPortal.loc2.x) {
-				rotmult = 2;
+				rotmult = 1;
 			} else if(protectedSigns.get(destPortalIndex*3+2)>destPortal.loc1.z &&
 				protectedSigns.get(destPortalIndex*3+2)>destPortal.loc2.z) {
-				rotmult = 3;
+				rotmult = 4;
 			} else if(protectedSigns.get(destPortalIndex*3+2)<destPortal.loc1.z &&
 				protectedSigns.get(destPortalIndex*3+2)<destPortal.loc2.z) {
-				rotmult = 1;
+				rotmult = 2;
 			}
-			
+			player.sendMessage("Rotmult: "+rotmult);
 			
             //translate player from portalFrom to portalTo
 			player.teleportTo(destx,destPortal.loc1.y,destz,rotmult*90, 0);
@@ -315,7 +314,6 @@ public class Test extends Plugin {
         					}
         				}
     		 		}
-    		 		player.sendMessage("Fire on obsidian");
     		 		playerList.add(player.getName());
     		 		fireblockLoc.add(blockPlaced.getX());
     		 		fireblockLoc.add(blockPlaced.getY());
