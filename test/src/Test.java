@@ -142,6 +142,7 @@ public class Test extends Plugin {
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
+						log.info (destsign.getText(i).toLowerCase());
 						if(destsign.getText(i).toLowerCase()=="Lock".toLowerCase()) {
 							signlock = 1;
 						} else if(destportalname=="") {
