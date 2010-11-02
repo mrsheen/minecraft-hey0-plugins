@@ -195,7 +195,6 @@ public class Test extends Plugin {
 				log.info(LOG_PREFIX+"An unnamed portal is being destroyed");
 				return true;
 			}
-			String portalPluginName = portalNames.get(portalIndex);
 			
 			portalNames.remove(portalIndex);
 			
@@ -204,7 +203,7 @@ public class Test extends Plugin {
 			protectedSigns.remove(portalIndex*3);
 			
 			//delete data from file
-			log.info(LOG_PREFIX+"Destroyed portal: " + portalPluginName);
+			log.info(LOG_PREFIX+"Destroyed portal: " + portal.Name);
 			return false;
 		}
         
