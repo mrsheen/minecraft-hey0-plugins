@@ -208,7 +208,7 @@ public class Test extends Plugin {
 				rotmult = 3;
 			} else if(protectedSigns.get(destPortalIndex*3+2)<destPortal.loc1.z &&
 				protectedSigns.get(destPortalIndex*3+2)<destPortal.loc2.z) {
-				rotmult = 4;
+				rotmult = 1;
 			}
 			
 			
