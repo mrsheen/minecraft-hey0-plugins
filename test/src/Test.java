@@ -142,7 +142,7 @@ public class Test extends Plugin {
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
-						if(destsign.getText(i).toLowerCase()=="Lock") {
+						if(destsign.getText(i).toLowerCase()=="lock") {
 							signlock = 1;
 						} else if(destportalname=="") {
 							destportalname = destsign.getText(i).toLowerCase();
@@ -200,7 +200,7 @@ public class Test extends Plugin {
 			
             player.sendMessage("Warping from portal "+portalNames.get(portalIndex)+" to portal "+destportalname);
 			
-			if(signlock==1) {
+			if(signlock==0) {
 				for(int i=0;i<4;i++) {
 					destsign.setText(i,"");
 				}
@@ -216,7 +216,7 @@ public class Test extends Plugin {
         	Player player=null;
         	long curtime = date.getTime();
         	log.info("Loc1 block type is "+server.getBlockIdAt((int)Math.floor(portal.loc1.x),(int)Math.floor(portal.loc1.y),(int)Math.floor(portal.loc1.z)));
-        	//server.setBlockAt(20,(int)Math.floor(portal.loc1.x),(int)Math.floor(portal.loc1.y),(int)Math.floor(portal.loc1.z));
+        	server.setBlockAt(20,(int)Math.floor(portal.loc1.x),(int)Math.floor(portal.loc1.y),(int)Math.floor(portal.loc1.z));
         	if(playerList.size()>0) {
         		for(int i=playerList.size()-1;i>=0;i--) {
         			if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc1.x) && 
