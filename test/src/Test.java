@@ -196,8 +196,25 @@ public class Test extends Plugin {
 				destx = destPortal.loc1.z;
 			}
 			
+			int destPortalIndex = getPortalIndex(destPortal.Name);
+			int rotmult = 0;
+			if(protectedSigns.get(destPortalIndex*3)>destPortal.loc1.x &&
+				protectedSigns.get(destPortalIndex*3)>destPortal.loc2.x) {
+				rotmult = 1;	
+			} else if(protectedSigns.get(destPortalIndex*3)<destPortal.loc1.x &&
+				protectedSigns.get(destPortalIndex*3)<destPortal.loc2.x) {
+				rotmult = 2;
+			} else if(protectedSigns.get(destPortalIndex*3+2)>destPortal.loc1.z &&
+				protectedSigns.get(destPortalIndex*3+2)>destPortal.loc2.z) {
+				rotmult = 3;
+			} else if(protectedSigns.get(destPortalIndex*3+2)<destPortal.loc1.z &&
+				protectedSigns.get(destPortalIndex*3+2)<destPortal.loc2.z) {
+				rotmult = 4;
+			}
+			
+			
             //translate player from portalFrom to portalTo
-			player.teleportTo(destx,destPortal.loc1.y,destz,player.getRotation(), player.getPitch());
+			player.teleportTo(destx,destPortal.loc1.y,destz,rotmult*90, 0);
 			
             player.sendMessage("Warping from portal "+portalNames.get(portalIndex)+" to portal "+destportalname);
 			
