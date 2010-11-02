@@ -261,7 +261,8 @@ public class Test extends Plugin {
     	}
         
         public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
-    		 if(blockPlaced.getType() == 51) {
+    		 //if(blockPlaced.getType() == 51) {
+    		 	if(itemInHand == 259) {
     		 	if(server.getBlockIdAt(blockPlaced.getX(),blockPlaced.getY()-1,blockPlaced.getZ())==49) {
     		 		if(playerList.size()>0) {
         				for(int i=playerList.size()-1;i>=0;i--) {
