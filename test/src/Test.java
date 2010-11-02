@@ -138,10 +138,13 @@ public class Test extends Plugin {
 			Sign destsign = getDestSign(portal);
 			String destportalname = "";
             //check that the portalTo name is valid
+            int signlock=0;
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
-						if(destportalname=="") {
+						if(destsign.getText(i).toLowerCase()=="Lock") {
+							signlock = 1;
+						} else if(destportalname=="") {
 							destportalname = destsign.getText(i).toLowerCase();
 						} else {
 							log.info(LOG_PREFIX+"Portal name signs must only have one non-blank line");
@@ -197,7 +200,12 @@ public class Test extends Plugin {
 			
             player.sendMessage("Warping from portal "+portalNames.get(portalIndex)+" to portal "+destportalname);
 			
-			
+			if(signlock==1) {
+				for(int i=0;i<4;i++) {
+					destsign.setText(i,"");
+				}
+				destsign.update();
+			}
 			
 			
 			//blank the sign
