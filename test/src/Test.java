@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,6 +10,7 @@ public class Test extends Plugin {
 	static final Logger log = Logger.getLogger("Minecraft");
     static String LOG_PREFIX = "[Portal Test] : ";
 	static Server server = etc.getServer();
+	Date date = new Date();
 	
 	private int[][][] NameSignLocs = {{{-1,3,0},{1,3,0}},{{0,3,-1},{0,3,1}}};
     private int[][][] DestSignLocs = {{{1,0,1},{1,0,-1},{1,1,1},{1,1,-1},{1,2,1},{1,2,-1}},{{-1,0,1},{1,0,1},{-1,1,1},{1,1,1},{-1,2,1},{1,2,1}}};
@@ -16,6 +18,7 @@ public class Test extends Plugin {
 	
 	static ArrayList<String> playerList = new ArrayList<String>();
 	static ArrayList<Integer> fireblockLoc = new ArrayList<Integer>();
+	static ArrayList<Long> fireblockTimestamps = new ArrayList<Long>();
 	
 	
 	static ArrayList<String> portalNames = new ArrayList<String>();
@@ -32,7 +35,7 @@ public class Test extends Plugin {
         for (String portalName : portals.split(" ")) {
             Portal portal = etc.getDataSource().getPortal(portalName);
             if (portal != null) {
-                addPortal(portal);
+                addPortal(null, portal);
                 portalsAdded++;
             }
         }
@@ -63,7 +66,7 @@ public class Test extends Plugin {
         listeners.add(etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.LOW));
     }
     
-    public boolean addPortal(Portal portal) {
+    public boolean addPortal(Player player, Portal portal) {
         if(portal.loc1.x==0 && portal.loc1.y==128 && portal.loc1.z==0) {
             log.info(LOG_PREFIX+"Blank portal passed");
             return true;
@@ -96,6 +99,12 @@ public class Test extends Plugin {
             return true;
         }
         
+        //check if the portal already exists
+        if(getPortalIndex(portalname)!=-1) {
+        	log.info(LOG_PREFIX+"Portal "+portalname+" is already created somewhere.");
+        	return true;
+        }
+        	
         // Have correct name, save data
         portal.setName(portalname);
         
@@ -188,7 +197,23 @@ public class Test extends Plugin {
 		}
         
         public boolean onPortalCreate(Portal portal) {
-			return addPortal(portal);
+        	Player player=null;
+        	long curtime = date.getTime();
+        	for(int i=playerList.size()-1;i>=0;i--) {
+        		if (fireblockLoc.get(i*3) == (int)Math.floor(portal.loc1.x) && 
+        			fireblockLoc.get(i*3+1) == (int)Math.floor(portal.loc1.y) && 
+        			fireblockLoc.get(i*3+2) == (int)Math.floor(portal.loc1.z)) {
+        				player=server.getPlayer(playerList.get(i));
+        			}
+        		if((curtime - fireblockTimestamps.get(i))>60) {
+        			playerList.remove(i);
+        			fireblockTimestamps.remove(i);
+        			fireblockLoc.remove(i*3);
+        			fireblockLoc.remove(i*3);
+        			fireblockLoc.remove(i*3);
+        		}
+        	}
+			return addPortal(player,portal);
 		}
         
         public boolean onPortalDestroy(Portal portal) {
@@ -224,9 +249,23 @@ public class Test extends Plugin {
         
         public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
     		 if(blockPlaced.getType() == 51) {
-                // This player may have just created a portal, add to list
-                // to check for subsequent onPortalCreate calls
-                
+    		 	if(server.getBlockIdAt(blockPlaced.getX(),blockPlaced.getY()-1,blockPlaced.getZ())==49) {
+        			for(int i=playerList.size()-1;i>=0;i--) {
+        				if (fireblockLoc.get(i*3) == blockPlaced.getX() && 
+        					fireblockLoc.get(i*3+1) == blockPlaced.getY() && 
+        					fireblockLoc.get(i*3+2) == blockPlaced.getZ()) {
+        					playerList.set(i,player.getName());
+        					fireblockTimestamps.set(i,date.getTime());
+        					return false;
+        				}
+        			}
+    		 		player.sendMessage("Fire on obsidian");
+    		 		playerList.add(player.getName());
+    		 		fireblockLoc.add(blockPlaced.getX());
+    		 		fireblockLoc.add(blockPlaced.getY());
+    		 		fireblockLoc.add(blockPlaced.getZ());
+    		 		fireblockTimestamps.add(date.getTime());
+    		 	}
     		 }
     		return false;
     	}
