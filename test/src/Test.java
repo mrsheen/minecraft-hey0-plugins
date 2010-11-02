@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 public class Test extends Plugin {
 
 	static final Logger log = Logger.getLogger("Minecraft");
+    static String LOG_PREFIX = "[Portal Test] : ";
 	static Server server = etc.getServer();
 	
 	private int[][][] NameSignLocs = {{{-1,3,0},{1,3,0}},{{0,3,-1},{0,3,1}}};
@@ -19,190 +20,243 @@ public class Test extends Plugin {
 	
 	static ArrayList<String> portalNames = new ArrayList<String>();
 	static ArrayList<Integer> protectedSigns = new ArrayList<Integer>();
-	
-	
-	
-	PluginRegisteredListener onportalentranceListener;
-	onportalentranceListener listener_portenter = new onportalentranceListener();
-	
-	PluginRegisteredListener onportalcreateListener;
-	onportalcreateListener listener_portcreate = new onportalcreateListener();
-	
-	PluginRegisteredListener onportaldestroyListener;
-	onportaldestroyListener listener_portdestroy = new onportaldestroyListener();
-	
-	PluginRegisteredListener blockdestroyListener;
-	blockdestroyListener listener_blockdestroy = new blockdestroyListener();
     
-    PluginRegisteredListener blockcreateListener;
-	blockcreateListener listener_blockcreate = new blockcreateListener();
+	private ArrayList<PluginRegisteredListener> listeners = new ArrayList<PluginRegisteredListener>();
 	
     public void enable() {
-		log.info("[Portal Test] Mod Enabled.");
+		log.info(LOG_PREFIX+"Mod Enabled.");
 		//Load portal data
+        int portalsAdded = 0;
+        
+        String portals = etc.getDataSource().getPortalNames();
+        for (String portalName : portals.split(" ")) {
+            Portal portal = etc.getDataSource().getPortal(portalName);
+            addPortal(portal);
+            portalsAdded++;
+        }
+        
+        log.info(LOG_PREFIX+"Loaded "+portalsAdded+" portals");
+        
     }
 
     public void disable() {
-		log.info("[Portal Test] Mod Disabled");
-		etc.getLoader().removeListener(onportalentranceListener);
-		etc.getLoader().removeListener(onportalcreateListener);
-		etc.getLoader().removeListener(onportaldestroyListener);
-		etc.getLoader().removeListener(blockdestroyListener);
-        etc.getLoader().removeListener(blockcreateListener);
+		
+        
+		PluginLoader loader = etc.getLoader();
+		for (PluginRegisteredListener rl : listeners)
+			loader.removeListener(rl);
+		listeners.clear();
+        
+        log.info(LOG_PREFIX+"Mod Disabled");
     }
     
     public void initialize() {
-    	onportalentranceListener = etc.getLoader().addListener(PluginLoader.Hook.PORTALWARP, listener_portenter, this, PluginListener.Priority.MEDIUM);
-    	onportalcreateListener = etc.getLoader().addListener(PluginLoader.Hook.PORTALCREATE, listener_portcreate, this, PluginListener.Priority.MEDIUM);
-    	onportaldestroyListener = etc.getLoader().addListener(PluginLoader.Hook.PORTALDESTROY, listener_portdestroy, this, PluginListener.Priority.MEDIUM);
-    	blockdestroyListener = etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, listener_blockdestroy, this, PluginListener.Priority.MEDIUM);
-        blockcreateListener = etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED,listener_blockcreate, this, PluginListener.Priority.MEDIUM);
+    	Listener l = new Listener();
+
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.PORTALWARP, l, this, PluginListener.Priority.LOW));
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.PORTALCREATE, l, this, PluginListener.Priority.LOW));
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.PORTALDESTROY, l, this, PluginListener.Priority.LOW));
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, l, this, PluginListener.Priority.LOW));
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, l, this, PluginListener.Priority.LOW));
+        listeners.add(etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.LOW));
     }
     
-    public class onportalentranceListener extends PluginListener {
+    public boolean addPortal(Portal portal) {
+        if(portal.loc1.x==0 && portal.loc1.y==128 && portal.loc1.z==0) {
+            log.info(LOG_PREFIX+"Blank portal passed");
+            return true;
+        }
+        Sign namingsign = getNameSign(portal);
+        String portalname = "";
+        if(namingsign != null) {
+            for(int i=0;i<4;i++) {
+                if(namingsign.getText(i).length()!=0) {
+                    if(portalname=="") {
+                        portalname = namingsign.getText(i).toLowerCase();
+                    } else {
+                        log.info(LOG_PREFIX+"Portal name signs must only have one non-blank line");
+                        return true;
+                    }
+                }
+            }
+            if(portalname.split(" ").length==1) {
+                if(portalname.split(":").length!=1) {
+                    log.info(LOG_PREFIX+"Portal names may not have : in them");
+                    return true;
+                }
+            } else {
+                log.info(LOG_PREFIX+"Portal names may not have spaces in them");
+                return true;
+            }
+        } else {
+            log.info(LOG_PREFIX+"Naming sign incorrectly positioned.");
+            log.info(LOG_PREFIX+"Place a single sign on the top row of obsidian");
+            return true;
+        }
+        
+        // Have correct name, save data
+        portal.setName(portalname);
+        
+        portalNames.add(portal.Name);
+        protectedSigns.add(namingsign.getX());
+        protectedSigns.add(namingsign.getY());
+        protectedSigns.add(namingsign.getZ());
+        log.info(LOG_PREFIX+"Portal "+portalname+" has been created.");
+        
+        // write data to the storage file
+                
+        return false;
+    }
+    
+    private class Listener extends PluginListener {
 		public boolean onPortalWarp(Player player, Portal portal) {
 			int portalIndex = getPortalIndex(portal.Name);
 			if(portalIndex == -1) {
-				log.info("ERROR: "+player.getName()+" is trying to use a portal unnamed by plugin");
-				return true;
+				log.info(LOG_PREFIX+player.getName()+" is using an unnamed portal");
+				return false;
 			}
+            //check that there is only one non-blank sign attached to the side of portalFrom
 			Sign destsign = getDestSign(portal);
 			String destportalname = "";
+            //check that the portalTo name is valid
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
 						if(destportalname=="") {
 							destportalname = destsign.getText(i).toLowerCase();
 						} else {
-							log.info("Portal name signs must only have one non-blank line");
+							log.info(LOG_PREFIX+"Portal name signs must only have one non-blank line");
 							return true;
 						}
 					}
 				}
 				if(destportalname.split(" ").length==1) {
 					if(destportalname.split(":").length!=1) {
-						log.info("Portal names may not have : in them");
+						log.info(LOG_PREFIX+"Portal names may not have : in them");
 						return true;
 					}
 				} else {
-					log.info("Portal names may not have spaces in them");
+					log.info(LOG_PREFIX+"Portal names may not have spaces in them");
 					return true;
 				}
 			} else {
-				log.info("Naming sign incorrectly positioned.");
-				log.info("Please a single sign one of the side columns of the portal");
+				log.info(LOG_PREFIX+"Naming sign incorrectly positioned.");
+				log.info(LOG_PREFIX+"Please a single sign one of the side columns of the portal");
             	return true;
 			}
-			int destportalIndex = getPortalIndexFromPluginName(destportalname);
+			int destportalIndex = getPortalIndex(destportalname);
 			if(destportalIndex == -1) {
 				player.sendMessage("There is no portal with the name "+destportalname);
 				return true;
 			}
 			
-			Portal destportal = etc.getDataSource().getPortal(portalNames.get(destportalIndex*2));
+			Portal destPortal = etc.getDataSource().getPortal(destportalname);
 			
+            if (destPortal == null)
+                return true;
+            
 			double destx = 0;
-			if(destportal.loc1.x == destportal.loc2.x) {
-				destx = destportal.loc1.x + 0.5D;
-			} else if(destportal.loc1.x<destportal.loc2.x) {
-				destx = (destportal.loc2.x-destportal.loc1.x)/2 + destportal.loc1.x;
+			if(destPortal.loc1.x == destPortal.loc2.x) {
+				destx = destPortal.loc1.x + 0.5D;
+			} else if(destPortal.loc1.x<destPortal.loc2.x) {
+				destx = (destPortal.loc2.x-destPortal.loc1.x)/2 + destPortal.loc1.x;
 			} else {
-				destx = (destportal.loc1.x-destportal.loc2.x)/2 + destportal.loc2.x;
+				destx = (destPortal.loc1.x-destPortal.loc2.x)/2 + destPortal.loc2.x;
 			}
 			
 			double destz = 0;
-			if(destportal.loc1.z == destportal.loc2.z) {
-				destz = destportal.loc1.z + 0.5D;
-			} else if(destportal.loc1.z<destportal.loc2.z) {
-				destz = (destportal.loc2.z-destportal.loc1.z)/2 + destportal.loc1.z;
+			if(destPortal.loc1.z == destPortal.loc2.z) {
+				destz = destPortal.loc1.z + 0.5D;
+			} else if(destPortal.loc1.z<destPortal.loc2.z) {
+				destz = (destPortal.loc2.z-destPortal.loc1.z)/2 + destPortal.loc1.z;
 			} else {
-				destz = (destportal.loc1.z-destportal.loc2.z)/2 + destportal.loc2.z;
+				destz = (destPortal.loc1.z-destPortal.loc2.z)/2 + destPortal.loc2.z;
 			}
 			
-			player.teleportTo(destx,destportal.loc1.y,destz,player.getRotation(), player.getPitch());
+            //translate player from portalFrom to portalTo
+			player.teleportTo(destx,destPortal.loc1.y,destz,player.getRotation(), player.getPitch());
 			
-            player.sendMessage("Warping from portal "+portalNames.get(portalIndex*2+1)+" to portal "+destportalname);
-			//check that there is only one non-blank sign attached to the side of portalFrom
-			//check that the portalTo name is valid
-			//get portalTo
-			//translate player from portalFrom to portalTo
+            player.sendMessage("Warping from portal "+portalNames.get(portalIndex)+" to portal "+destportalname);
+			
+			
+			
+			
 			//blank the sign
+			return true;
+		}
+        
+        public boolean onPortalCreate(Portal portal) {
+			return addPortal(portal);
+		}
+        
+        public boolean onPortalDestroy(Portal portal) {
+            int portalIndex = getPortalIndex(portal.Name);
+			if(portalIndex == -1) {
+				log.info(LOG_PREFIX+"An unnamed portal is being destroyed");
+				return true;
+			}
+			String portalPluginName = portalNames.get(portalIndex);
+			
+			portalNames.remove(portalIndex);
+			
+			protectedSigns.remove(portalIndex*3);
+			protectedSigns.remove(portalIndex*3);
+			protectedSigns.remove(portalIndex*3);
+			
+			//delete data from file
+			log.info(LOG_PREFIX+"Destroyed portal: " + portalPluginName);
 			return false;
 		}
+        
+        public boolean onBlockDestroy(Player player, Block block) {
+    		if(block.getType() == 68) {
+    			for(int i=0;i<protectedSigns.size()/3;i++) {
+    				if(block.getX() == protectedSigns.get(i*3) &&
+    				block.getY() == protectedSigns.get(i*3+1) &&
+    				block.getZ() == protectedSigns.get(i*3+2)) {
+    				return true;
+    				}
+    			}
+    		}
+    		return false;
+    	}
+        
+        public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
+    		 if(blockPlaced.getType() == 51) {
+                // This player may have just created a portal, add to list
+                // to check for subsequent onPortalCreate calls
+                
+    		 }
+    		return false;
+    	}
+        
+        public boolean onCommand(Player player, String[] split) {
+            if (!player.canUseCommand("/listportals"))
+				return false;
+			
+			String cmd = split[0].toLowerCase();
+			
+			if (cmd.equals("/listportals")) {
+				String portals = etc.getDataSource().getPortalNames();
+				
+				player.sendMessage(Colors.Rose+"Portals: " + Colors.White + portals);
+                return true;
+            }
+            return false; 
+        }
     }
     
 	private static int getPortalIndex(String portalName) {
 		boolean inList = false;
 		for (String p : portalNames) {
-			if (p==portalName)
+			if (p.equalsIgnoreCase(portalName))
 				inList = true;
 		}
 		if (!inList) {
 			return -1;
 		}
-		return portalNames.indexOf(portalName)/2;
+		return portalNames.indexOf(portalName);
 	}
-    
-	private static int getPortalIndexFromPluginName(String portalName) {
-		boolean inList = false;
-		for (String p : portalNames) {
-			if (p==portalName)
-				inList = true;
-		}
-		if (!inList) {
-			return -1;
-		}
-		return (portalNames.indexOf(portalName)-1)/2;
-	}
-    
-    
-    
-    public class onportalcreateListener extends PluginListener {
-		public boolean onPortalCreate(Portal portal) {
-			if(portal.loc1.x==0 && portal.loc1.y==128 && portal.loc1.z==0) {
-				log.info("ERROR: Blank portal passed");
-				return true;
-			}
-			Sign namingsign = getNameSign(portal);
-			String portalname = "";
-			if(namingsign != null) {
-				for(int i=0;i<4;i++) {
-					if(namingsign.getText(i).length()!=0) {
-						if(portalname=="") {
-							portalname = namingsign.getText(i).toLowerCase();
-						} else {
-							log.info("Portal name signs must only have one non-blank line");
-							return true;
-						}
-					}
-				}
-				if(portalname.split(" ").length==1) {
-					if(portalname.split(":").length!=1) {
-						log.info("Portal names may not have : in them");
-						return true;
-					}
-				} else {
-					log.info("Portal names may not have spaces in them");
-					return true;
-				}
-			} else {
-				log.info("Naming sign incorrectly positioned.");
-				log.info("Place a single sign on the top row of obsidian");
-            	return true;
-			}
-			
-			portalNames.add(portal.Name);
-			portalNames.add(portalname);
-			protectedSigns.add(namingsign.getX());
-			protectedSigns.add(namingsign.getY());
-			protectedSigns.add(namingsign.getZ());
-			log.info("Portal "+portalname+" has been created.");
-			
-						// write data to the storage file
-						
-			return false;
-		}
-    }
     
     public Sign getNameSign(Portal portal) {
     	Sign returnsign = null;
@@ -250,9 +304,9 @@ public class Test extends Plugin {
 			locarray[4] = (int)Math.floor(portal.loc1.y);
 			locarray[5] = (int)Math.floor(portal.loc1.z);	
     	}
-    	int facing = 1;
+    	int facing = 0;
     	if((locarray[0]-locarray[3]) == 0) {
-    		facing = 0;
+    		facing = 1;
     	}
     	int k = 0;
     	for (int j=0;j<2;j++) {
@@ -262,11 +316,11 @@ public class Test extends Plugin {
     			k=1;
     		}
     		for (int i=0;i<6;i++) {
-				if(server.getBlockIdAt(locarray[j*3]+DestSignLocs[facing][i][0]*k,
+                if(server.getBlockIdAt(locarray[j*3]+DestSignLocs[facing][i][0]*k,
 										locarray[j*3+1]+DestSignLocs[facing][i][1], 
 										locarray[j*3+2]+DestSignLocs[facing][i][2]*k) == 68) {
 					if(returnsign != null) {
-						return null;
+						return null; // If we get multiple matches, return none of them
 					}
 					returnsign = (Sign) server.getComplexBlock(locarray[j*3]+DestSignLocs[facing][i][0]*k,
 																locarray[j*3+1]+DestSignLocs[facing][i][1], 
@@ -275,53 +329,5 @@ public class Test extends Plugin {
     		}
     	}
     	return returnsign;
-    }
-    
-    public class onportaldestroyListener extends PluginListener {
-		public boolean onPortalDestroy(Portal portal) {
-			int portalIndex = getPortalIndex(portal.Name);
-			if(portalIndex == -1) {
-				log.info("ERROR: An unnamed portal is being destroyed");
-				return true;
-			}
-			String portalPluginName = portalNames.get(portalIndex*2+1);
-			
-			portalNames.remove(portalIndex*2);
-			portalNames.remove(portalIndex*2);
-			
-			protectedSigns.remove(portalIndex*3);
-			protectedSigns.remove(portalIndex*3);
-			protectedSigns.remove(portalIndex*3);
-			
-			//delete data from file
-			log.info("Destroyed portal: " + portalPluginName);
-			return false;
-		}
-    }
-    
-    public class blockdestroyListener extends PluginListener {
-    	public boolean onBlockDestroy(Player player, Block block) {
-    		if(block.getType() == 68) {
-    			for(int i=0;i<protectedSigns.size()/3;i++) {
-    				if(block.getX() == protectedSigns.get(i*3) ||
-    				block.getY() == protectedSigns.get(i*3+1) ||
-    				block.getZ() == protectedSigns.get(i*3+2)) {
-    				return true;
-    				}
-    			}
-    		}
-    		return false;
-    	}
-    }
-    
-    public class blockcreateListener extends PluginListener {
-    	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
-    		 if(blockPlaced.getType() == 51) {
-                // This player may have just created a portal, add to list
-                // to check for subsequent onPortalCreate calls
-                
-    		 }
-    		return false;
-    	}
     }
 }
