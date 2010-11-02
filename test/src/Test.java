@@ -31,8 +31,10 @@ public class Test extends Plugin {
         String portals = etc.getDataSource().getPortalNames();
         for (String portalName : portals.split(" ")) {
             Portal portal = etc.getDataSource().getPortal(portalName);
-            addPortal(portal);
-            portalsAdded++;
+            if (portal != null) {
+                addPortal(portal);
+                portalsAdded++;
+            }
         }
         
         log.info(LOG_PREFIX+"Loaded "+portalsAdded+" portals");
