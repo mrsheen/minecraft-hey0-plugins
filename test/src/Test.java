@@ -71,6 +71,12 @@ public class Test extends Plugin {
             log.info(LOG_PREFIX+"Blank portal passed");
             return true;
         }
+        
+        if(player!=null) {
+        	player.sendMessage("You did it!");
+        	log.info("Portal created by "+player.getName());
+        }
+        
         Sign namingsign = getNameSign(portal);
         String portalname = "";
         if(namingsign != null) {
