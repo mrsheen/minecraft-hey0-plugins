@@ -86,29 +86,29 @@ public class Test extends Plugin {
                     if(portalname=="") {
                         portalname = namingsign.getText(i).toLowerCase();
                     } else {
-                        log.info(LOG_PREFIX+"Portal name signs must only have one non-blank line");
+                        sendorlog(player, "Portal name signs must only have one non-blank line");
                         return true;
                     }
                 }
             }
             if(portalname.split(" ").length==1) {
                 if(portalname.split(":").length!=1) {
-                    log.info(LOG_PREFIX+"Portal names may not have : in them");
+                    sendorlog(player, "Portal names may not have : in them");
                     return true;
                 }
             } else {
-                log.info(LOG_PREFIX+"Portal names may not have spaces in them");
+                sendorlog(player, "Portal names may not have spaces in them");
                 return true;
             }
         } else {
-            log.info(LOG_PREFIX+"Naming sign incorrectly positioned.");
-            log.info(LOG_PREFIX+"Place a single sign on the top row of obsidian");
+            sendorlog(player, "Naming sign incorrectly positioned.");
+            sendorlog(player, "Place a single sign on the top row of obsidian");
             return true;
         }
         
         //check if the portal already exists
         if(getPortalIndex(portalname)!=-1) {
-        	log.info(LOG_PREFIX+"Portal "+portalname+" is already created somewhere.");
+        	sendorlog(player, "Portal "+portalname+" is already created somewhere.");
         	return true;
         }
         	
@@ -119,7 +119,7 @@ public class Test extends Plugin {
         protectedSigns.add(namingsign.getX());
         protectedSigns.add(namingsign.getY());
         protectedSigns.add(namingsign.getZ());
-        log.info(LOG_PREFIX+"Portal "+portalname+" has been created.");
+        sendorlog(player, "Portal "+portalname+" has been created.");
         
         // write data to the storage file
                 
@@ -141,33 +141,33 @@ public class Test extends Plugin {
 			if(destsign != null) {
 				for(int i=0;i<4;i++) {
 					if(destsign.getText(i).length()!=0) {
-						if(destsign.getText(i).trim().equalsIgnoreCase("lock")) {
+						if(destsign.getText(i).trim().equalsIgnoreCase("wipe")) {
 							signlock = 1;
 						} else if(destportalname=="") {
 							destportalname = destsign.getText(i).toLowerCase();
 						} else {
-							log.info(LOG_PREFIX+"Portal name signs must only have one non-blank line");
+							sendorlog(player, "Portal name signs must only have one non-blank line");
 							return true;
 						}
 					}
 				}
 				if(destportalname.split(" ").length==1) {
 					if(destportalname.split(":").length!=1) {
-						log.info(LOG_PREFIX+"Portal names may not have : in them");
+						sendorlog(player, "Portal names may not have : in them");
 						return true;
 					}
 				} else {
-					log.info(LOG_PREFIX+"Portal names may not have spaces in them");
+					sendorlog(player, "Portal names may not have spaces in them");
 					return true;
 				}
 			} else {
-				log.info(LOG_PREFIX+"Naming sign incorrectly positioned.");
-				log.info(LOG_PREFIX+"Please a single sign one of the side columns of the portal");
+				sendorlog(player, "Naming sign incorrectly positioned.");
+				sendorlog(player, "Please a single sign one of the side columns of the portal");
             	return true;
 			}
 			int destportalIndex = getPortalIndex(destportalname);
 			if(destportalIndex == -1) {
-				player.sendMessage("There is no portal with the name "+destportalname);
+				sendorlog(player, "There is no portal with the name "+destportalname);
 				return true;
 			}
 			
@@ -214,9 +214,9 @@ public class Test extends Plugin {
             //translate player from portalFrom to portalTo
 			player.teleportTo(destx,destPortal.loc1.y,destz,rotmult*90, 0);
 			
-            player.sendMessage("Warping from portal "+portalNames.get(portalIndex)+" to portal "+destportalname);
+            sendorlog(player, "Warping from portal "+portal.Name+" to portal "+destportalname);
 			
-			if(signlock==0) {
+			if(signlock==1) {
 				for(int i=0;i<4;i++) {
 					destsign.setText(i,"");
 				}
@@ -350,6 +350,15 @@ public class Test extends Plugin {
 			return -1;
 		}
 		return portalNames.indexOf(portalName);
+	}
+		
+	public void sendorlog(Player player, String message) {
+		if(player!=null) {
+			player.sendMessage(message);
+		} else {
+			log.info(LOG_PREFIX+"Null player "+message);
+		}
+		return;
 	}
     
     public Sign getNameSign(Portal portal) {
