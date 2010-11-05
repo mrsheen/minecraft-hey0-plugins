@@ -17,9 +17,11 @@ public class MCAUtils extends Plugin {
 
 	PluginRegisteredListener walkListener;
 	PluginRegisteredListener blockcreateListener;
+	PluginRegisteredListener commandListener;
 
 	walkListener listener_walk = new walkListener();
 	blockcreateListener listener_blockcreate = new blockcreateListener();
+	commandListener listener_command = new commandListener();
 	
     public void enable() {
 		log.info("[MCAUtils] Mod Enabled.");
@@ -35,11 +37,13 @@ public class MCAUtils extends Plugin {
         }
         etc.getLoader().removeListener(walkListener);
         etc.getLoader().removeListener(blockcreateListener);
+        etc.getLoader().removeListener(commandListener);
     }
     
     public void initialize() {
     	blockcreateListener = etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener_blockcreate, this, PluginListener.Priority.MEDIUM);
     	walkListener = etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener_walk, this, PluginListener.Priority.MEDIUM);
+    	commandListener = etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener_command, this, PluginListener.Priority.MEDIUM);
     }
     
 	private void loadProperties(){
@@ -117,13 +121,40 @@ public class MCAUtils extends Plugin {
 			}
 		}
     }
+    public class commandListener extends PluginListener
+    {
+    	public boolean onCommand(Player player, java.lang.String[] split) {
+    		
+    		if(split[0].equalsIgnoreCase("/tpos") && player.canUseCommand("/tpos")) {
+    			if(split.length==3) {
+    				try {
+    					player.teleportTo(Double.parseDouble(split[1]) + 0.5D,
+    										server.getHighestBlockY(Integer.parseInt(split[1]),
+    																Integer.parseInt(split[2])),
+    										Double.parseDouble(split[2]) + 0.5D,
+    										player.getRotation(),
+    										player.getPitch());
+    					player.sendMessage("Teleported");
+    					return true;
+    				} catch (NumberFormatException ex) {
+    					
+    				}
+    			}
+    			
+    			player.sendMessage("Incorrect arguments");
+    			return true;
+    		}
+    		
+    		return false;
+    	}
+    }
     
     
     public class blockcreateListener extends PluginListener
     {
     	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
     		//block item if disallowed
-    		if(disalloweditems.length>0 && !player.canUseCommand("/useblockeditems")) {
+    		/*if(disalloweditems.length>0 && !player.canUseCommand("/useblockeditems")) {
 				player.sendMessage("Reached");
 				for (int i = 0; i<disalloweditems.length;i++) {
 					if (itemInHand == disalloweditems[i]) {
@@ -131,7 +162,7 @@ public class MCAUtils extends Plugin {
 						return true;
 					}
 				}
-			}
+			}*/
     		//whitelist fire
 			if(itemInHand==259 || itemInHand==51) {
 				if(player.canUseCommand("/usefire")) {
