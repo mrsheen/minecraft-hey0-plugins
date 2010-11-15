@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.channels.FileChannel;
 
 @SuppressWarnings("serial")
 public class CuboidData implements Serializable {
-	// Version 9 : 14/10 11h45 GMT+2
-	// for servermod 115-116
+	// Version 14 : 11/11 15h30 GMT+1
+	// for servermod 123-125+
 	
 	public String owner = "";
 	private String name ="";
@@ -103,4 +104,47 @@ public class CuboidData implements Serializable {
 		CuboidPlugin.log.info("Loaded cuboid : "+this.name);
 		return 0;
 	}
+	
+	public static boolean copyFile(File sourceFile, File destFile) {
+		boolean returnStatus = true;
+		if(!destFile.exists()) {
+			try{
+				destFile.createNewFile();
+			}
+			catch(Exception e){
+				returnStatus = false;
+			}
+		}
+
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			destination.transferFrom(source, 0, source.size());
+		}
+		catch (Exception e){
+			returnStatus = false;
+		}
+		finally {
+			if(source != null) {
+				try{
+					source.close();
+				}
+				catch(Exception e){
+					returnStatus = false;
+				}
+			}
+			if(destination != null) {
+				try{
+					destination.close();
+				}
+				catch(Exception e){
+					returnStatus = false;
+				}
+			}
+		}
+		return returnStatus;
+	}
+	
 }
