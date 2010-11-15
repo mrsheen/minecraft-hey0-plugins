@@ -1112,7 +1112,7 @@ public class CuboidPlugin extends Plugin {
 						player.sendMessage(Colors.Blue + "This area is owned by another player");
 					}
 					return true;
-					}("
+				}
 			}
 			
 			return false;
