@@ -1,9 +1,7 @@
 import java.util.logging.Logger;
 
-/**
-*
-* @author MonkeyCrumpets
-*/
+//@author MonkeyCrumpets
+
 public class NewUserAlert extends Plugin  {
 	private Listener l = new Listener(this);
 	protected static final Logger log = Logger.getLogger("Minecraft");
