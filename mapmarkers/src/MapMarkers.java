@@ -205,10 +205,11 @@ public class MapMarkers extends Plugin {
 				{
 					try {
 						JSONObject marker = (JSONObject)tempmarkersArray.get(i);
-						setMarker((String)marker.get("msg"), (Double)marker.get("x"), (Double)marker.get("y"), (Double)marker.get("z"), (Integer)marker.get("id"), dateFormat.parse((String)marker.get("timestamp")));
+						long id = (Long) marker.get("id");
+						setMarker((String)marker.get("msg"), (Double)marker.get("x"), (Double)marker.get("y"), (Double)marker.get("z"), (int) id, dateFormat.parse((String)marker.get("timestamp")));
 					}
 					catch(Exception e) {
-						//ee.printStackTrace();
+						e.printStackTrace();
 					}
 					
 				}	
