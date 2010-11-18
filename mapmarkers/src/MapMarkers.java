@@ -104,10 +104,12 @@ public class MapMarkers extends Plugin {
 		try {
 			File fileCreator = new File(markersFile);
 			if (!fileCreator.exists())
+			{
 				fileCreator.createNewFile();
 				BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
 				fout.write(markersArray.toString());
 				fout.close();
+			}
 		} catch (IOException e) {
 			log.log(Level.SEVERE, LOG_PREFIX + "Exception while creating mapmarkers file.", e);
 		}
