@@ -382,15 +382,16 @@ public class MapMarkers extends Plugin {
 			}
 		}
 
-		public void onTeleport(Player player, Location from, Location to) {
+		public boolean onTeleport(Player player, Location from, Location to) {
 			try {
-				setMarker(player.getName(), to.getX(),  to.getY(),  to.getZ(), 4);
+				setMarker(player.getName(), to.x, to.y, to.z, 4);
 				// Update file
 				writeMarkers();
 			}
 			catch (Exception e) {
 				
 			}
+			return false;
 			
 		}
 	}
