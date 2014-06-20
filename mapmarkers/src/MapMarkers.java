@@ -53,6 +53,7 @@ public class MapMarkers extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.LOGIN, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.TELEPORT, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, listener, this, PluginListener.Priority.LOW);
 	}
 	
@@ -379,6 +380,19 @@ public class MapMarkers extends Plugin {
 			catch (Exception e) {
 				
 			}
+		}
+
+		public boolean onTeleport(Player player, Location from, Location to) {
+			try {
+				setMarker(player.getName(), to.x, to.y, to.z, 4);
+				// Update file
+				writeMarkers();
+			}
+			catch (Exception e) {
+				
+			}
+			return false;
+			
 		}
 	}
 }
