@@ -104,10 +104,12 @@ public class MapMarkers extends Plugin {
 		try {
 			File fileCreator = new File(markersFile);
 			if (!fileCreator.exists())
+			{
 				fileCreator.createNewFile();
 				BufferedWriter fout = new BufferedWriter(new FileWriter(markersFile));
 				fout.write(markersArray.toString());
 				fout.close();
+			}
 		} catch (IOException e) {
 			log.log(Level.SEVERE, LOG_PREFIX + "Exception while creating mapmarkers file.", e);
 		}
@@ -203,10 +205,11 @@ public class MapMarkers extends Plugin {
 				{
 					try {
 						JSONObject marker = (JSONObject)tempmarkersArray.get(i);
-						setMarker((String)marker.get("msg"), (Double)marker.get("x"), (Double)marker.get("y"), (Double)marker.get("z"), (Integer)marker.get("id"), dateFormat.parse((String)marker.get("timestamp")));
+						long id = (Long) marker.get("id");
+						setMarker((String)marker.get("msg"), (Double)marker.get("x"), (Double)marker.get("y"), (Double)marker.get("z"), (int) id, dateFormat.parse((String)marker.get("timestamp")));
 					}
 					catch(Exception e) {
-						//ee.printStackTrace();
+						e.printStackTrace();
 					}
 					
 				}	
